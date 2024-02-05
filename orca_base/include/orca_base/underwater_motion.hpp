@@ -23,18 +23,17 @@
 #ifndef ORCA_BASE__UNDERWATER_MOTION_HPP_
 #define ORCA_BASE__UNDERWATER_MOTION_HPP_
 
-#include <memory>
 #include <string>
 
-#include "geometry_msgs/msg/accel_stamped.hpp"
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include "geometry_msgs/msg/transform_stamped.hpp"
-#include "geometry_msgs/msg/twist_stamped.hpp"
-#include "geometry_msgs/msg/wrench_stamped.hpp"
-#include "nav_msgs/msg/odometry.hpp"
+#include "geometry_msgs/msg/accel_stamped.hpp" // IWYU pragma: keep
+#include "geometry_msgs/msg/pose_stamped.hpp" // IWYU pragma: keep
+#include "geometry_msgs/msg/transform_stamped.hpp" // IWYU pragma: keep
+#include "geometry_msgs/msg/twist_stamped.hpp" // IWYU pragma: keep
+#include "geometry_msgs/msg/wrench_stamped.hpp" // IWYU pragma: keep
+#include "nav_msgs/msg/odometry.hpp" // IWYU pragma: keep
 #include "orca_base/base_context.hpp"
-#include "orca_msgs/msg/motion.hpp"
-#include "orca_shared/model.hpp"
+#include "orca_msgs/msg/motion.hpp" // IWYU pragma: keep
+#include "orca_shared/model.hpp" // IWYU pragma: keep
 #include "rclcpp/logger.hpp"
 
 namespace orca_base
@@ -46,7 +45,7 @@ class UnderwaterMotion
   const BaseContext & cxt_;
   orca_msgs::msg::Motion motion_;
 
-  double report_and_clamp(std::string func, std::string name, double v, double minmax);
+  double report_and_clamp(const std::string &func, const std::string &name, double v, double minmax) const;
 
   [[nodiscard]] geometry_msgs::msg::Accel calc_accel(
     const geometry_msgs::msg::Twist & v0,

@@ -20,7 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#include <memory>
 #include <string>
 
 #include "orca_base/underwater_motion.hpp"
@@ -60,10 +59,10 @@ UnderwaterMotion::UnderwaterMotion(
 // Loud vs quiet clamp functions
 // #define CLAMP(v, minmax) report_and_clamp(__func__, #v, v, minmax)
 #define CLAMP(v, minmax) orca::clamp(v, minmax)
-#define EPSILON 0.00001
+constexpr double EPSILON = 0.00001;
 
 double
-UnderwaterMotion::report_and_clamp(std::string func, std::string name, double v, double minmax)
+UnderwaterMotion::report_and_clamp(const std::string &func, const std::string &name, double v, double minmax) const
 {
   if (v > minmax + EPSILON) {
     RCLCPP_INFO(

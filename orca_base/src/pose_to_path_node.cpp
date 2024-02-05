@@ -22,8 +22,8 @@
 
 #include <memory>
 
-#include "nav_msgs/msg/path.hpp"
-#include "rclcpp/rclcpp.hpp"
+#include "nav_msgs/msg/path.hpp" // IWYU pragma: keep
+#include "rclcpp/rclcpp.hpp" // IWYU pragma: keep
 
 namespace orca_vision
 {

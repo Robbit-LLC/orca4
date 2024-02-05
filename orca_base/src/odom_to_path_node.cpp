@@ -22,9 +22,9 @@
 
 #include <memory>
 
-#include "nav_msgs/msg/odometry.hpp"
-#include "nav_msgs/msg/path.hpp"
-#include "rclcpp/rclcpp.hpp"
+#include "nav_msgs/msg/odometry.hpp" // IWYU pragma: keep
+#include "nav_msgs/msg/path.hpp" // IWYU pragma: keep
+#include "rclcpp/rclcpp.hpp" // IWYU pragma: keep
 #include "ros2_shared/context_macros.hpp"
 
 namespace orca_vision

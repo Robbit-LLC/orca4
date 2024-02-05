@@ -27,14 +27,11 @@
 #include <limits>
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "orca_nav2/param_macro.hpp"
 #include "orca_shared/util.hpp"
 #include "nav2_core/controller.hpp"
 #include "nav2_core/exceptions.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "pluginlib/class_loader.hpp"
 
 namespace orca_nav2
 {

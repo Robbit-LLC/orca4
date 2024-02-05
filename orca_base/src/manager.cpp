@@ -20,21 +20,22 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <vector>
 
-#include "geometry_msgs/msg/pose_stamped.hpp"
-#include "mavros_msgs/msg/state.hpp"
-#include "mavros_msgs/srv/command_bool.hpp"
-#include "mavros_msgs/srv/message_interval.hpp"
-#include "mavros_msgs/srv/set_mode.hpp"
-#include "nav2_msgs/srv/manage_lifecycle_nodes.hpp"
+#include "geometry_msgs/msg/pose_stamped.hpp" // IWYU pragma: keep
+#include "mavros_msgs/msg/state.hpp" // IWYU pragma: keep
+#include "mavros_msgs/srv/command_bool.hpp" // IWYU pragma: keep
+#include "mavros_msgs/srv/message_interval.hpp" // IWYU pragma: keep
+#include "mavros_msgs/srv/set_mode.hpp" // IWYU pragma: keep
+#include "nav2_msgs/srv/manage_lifecycle_nodes.hpp" // IWYU pragma: keep
 #include "nav2_util/service_client.hpp"
-#include "orca_msgs/action/target_mode.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "rclcpp_action/rclcpp_action.hpp"
-#include "std_srvs/srv/set_bool.hpp"
+#include "orca_msgs/action/target_mode.hpp" // IWYU pragma: keep
+#include "rclcpp/rclcpp.hpp" // IWYU pragma: keep
+#include "rclcpp_action/rclcpp_action.hpp" // IWYU pragma: keep
+#include "std_srvs/srv/set_bool.hpp" // IWYU pragma: keep
 
 namespace orca_base
 {
@@ -99,7 +100,7 @@ class Manager : public rclcpp::Node
   rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr ekf_pose_sub_;
   rclcpp::Subscription<mavros_msgs::msg::State>::SharedPtr state_sub_;
 
-  bool set_arm(bool arm)
+  bool set_arm(bool arm) const
   {
     auto request = std::make_shared<mavros_msgs::srv::CommandBool::Request>();
     auto response = std::make_shared<mavros_msgs::srv::CommandBool::Response>();
@@ -112,7 +113,7 @@ class Manager : public rclcpp::Node
     return result;
   }
 
-  bool set_ardusub_mode(uint8_t base_mode, const std::string & custom_mode)
+  bool set_ardusub_mode(uint8_t base_mode, const std::string & custom_mode) const
   {
     auto request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
     auto response = std::make_shared<mavros_msgs::srv::SetMode::Response>();
@@ -126,7 +127,7 @@ class Manager : public rclcpp::Node
     return result;
   }
 
-  bool set_message_rate(uint8_t msg_id)
+  bool set_message_rate(uint8_t msg_id) const
   {
     auto request = std::make_shared<mavros_msgs::srv::MessageInterval::Request>();
     auto response = std::make_shared<mavros_msgs::srv::MessageInterval::Response>();
@@ -145,11 +146,11 @@ class Manager : public rclcpp::Node
     RCLCPP_INFO_ONCE(get_logger(), "setting message rates to %ld hz every 10s", mav_msg_rate_);
 
     for (auto msg_id : mav_msg_ids_) {
-      set_message_rate(msg_id);
+      set_message_rate(static_cast<uint8_t>(msg_id));
     }
   }
 
-  bool call_nav2(uint8_t command)
+  bool call_nav2(uint8_t command) const
   {
     auto request = std::make_shared<nav2_msgs::srv::ManageLifecycleNodes::Request>();
     auto response = std::make_shared<nav2_msgs::srv::ManageLifecycleNodes::Response>();
@@ -162,7 +163,7 @@ class Manager : public rclcpp::Node
     return result;
   }
 
-  bool call_base(bool conn)
+  bool call_base(bool conn) const
   {
     auto request = std::make_shared<std_srvs::srv::SetBool::Request>();
     auto response = std::make_shared<std_srvs::srv::SetBool::Response>();
@@ -306,7 +307,7 @@ class Manager : public rclcpp::Node
 
   rclcpp_action::GoalResponse handle_goal(
     const rclcpp_action::GoalUUID & uuid,
-    std::shared_ptr<const TargetMode::Goal> goal)  // NOLINT
+    std::shared_ptr<const TargetMode::Goal> goal) const  // NOLINT
   {
     (void) uuid;
 
@@ -400,7 +401,7 @@ public:
             // Change modes
             mode_timer_ = create_wall_timer(
               1s,
-              [this]() -> void {
+              [this]() {
                 go_to_target_mode();
               });
 
@@ -409,7 +410,7 @@ public:
             // Set up a timer to periodically set message rates
             mav_msg_rate_timer_ = create_wall_timer(
               10s,
-              [this]() -> void {
+              [this]() {
                 set_message_rates();
               });
 
@@ -452,7 +453,7 @@ public:
     // Postpone some construction
     init_timer_ = create_wall_timer(
       0s,
-      [this]() -> void {
+      [this]() {
         init_timer_->cancel();  // One-shot
         post_construction_cb();
       });

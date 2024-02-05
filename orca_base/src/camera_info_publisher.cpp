@@ -24,7 +24,7 @@
 #include <string>
 
 #include "camera_info_manager/camera_info_manager.hpp"
-#include "rclcpp/rclcpp.hpp"
+#include "rclcpp/rclcpp.hpp" // IWYU pragma: keep
 #include "ros2_shared/context_macros.hpp"
 
 namespace orca_base

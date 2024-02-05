@@ -24,15 +24,15 @@
 #include <string>
 #include <utility>
 
-#include "geographic_msgs/msg/geo_pose_stamped.hpp"
-#include "mavros_msgs/msg/override_rc_in.hpp"
-#include "nav_msgs/msg/odometry.hpp"
+#include "geographic_msgs/msg/geo_pose_stamped.hpp" // IWYU pragma: keep
+#include "mavros_msgs/msg/override_rc_in.hpp" // IWYU pragma: keep
+#include "nav_msgs/msg/odometry.hpp" // IWYU pragma: keep
 #include "orca_base/underwater_motion.hpp"
-#include "orca_shared/model.hpp"
+#include "orca_shared/model.hpp" // IWYU pragma: keep
 #include "orca_shared/pwm.hpp"
 #include "orca_shared/util.hpp"
-#include "rclcpp/rclcpp.hpp"
-#include "std_srvs/srv/set_bool.hpp"
+#include "rclcpp/rclcpp.hpp" // IWYU pragma: keep
+#include "std_srvs/srv/set_bool.hpp" // IWYU pragma: keep
 #include "tf2_ros/transform_broadcaster.h"
 #include "tf2_ros/transform_listener.h"
 
@@ -167,7 +167,7 @@ class BaseController : public rclcpp::Node
     tf_broadcaster_->sendTransform(tm);
   }
 
-  void publish_ext_nav(const tf2::Transform & ext_nav)
+  void publish_ext_nav(const tf2::Transform & ext_nav) const
   {
     geometry_msgs::msg::PoseStamped ext_nav_msg;
     ext_nav_msg.header.stamp = now();
@@ -179,7 +179,7 @@ class BaseController : public rclcpp::Node
   // Publish the altitude setpoint in the map frame and ArduSub will hold the altitude using the
   // barometer sensor + vision (if available). Note that, for z, the odom frame and the map frame
   // are the same.
-  void publish_setpoint()
+  void publish_setpoint() const
   {
     geographic_msgs::msg::GeoPoseStamped msg;
     msg.header.stamp = now();
@@ -188,7 +188,7 @@ class BaseController : public rclcpp::Node
     setpoint_pub_->publish(msg);
   }
 
-  void publish_rc()
+  void publish_rc() const
   {
     if (rc_pub_->get_subscription_count() > 0) {
       mavros_msgs::msg::OverrideRCIn msg;
@@ -402,7 +402,7 @@ public:
       [this](
         const std::shared_ptr<rmw_request_id_t>,
         const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-        std::shared_ptr<std_srvs::srv::SetBool::Response> response) -> void
+        std::shared_ptr<std_srvs::srv::SetBool::Response> response)
       {
         if (conn_ != request->data) {
           if (request->data) {
@@ -420,21 +420,21 @@ public:
 
     cmd_vel_sub_ = create_subscription<geometry_msgs::msg::Twist>(
       "cmd_vel", reliable,
-      [this](geometry_msgs::msg::Twist::ConstSharedPtr msg) -> void
+      [this](geometry_msgs::msg::Twist::ConstSharedPtr msg)
       {
         cmd_vel_ = *msg;
       });
 
     ardu_pose_sub_ = create_subscription<geometry_msgs::msg::PoseStamped>(
       "/mavros/local_position/pose", best_effort,
-      [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) -> void
+      [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
       {
         ardu_pose_cb(msg);
       });
 
     slam_pose_sub_ = create_subscription<geometry_msgs::msg::PoseStamped>(
       "camera_pose", reliable,
-      [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) -> void
+      [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
       {
         slam_pose_cb(msg);
       });

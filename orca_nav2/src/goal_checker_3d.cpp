@@ -23,7 +23,6 @@
 #include <limits>
 #include <string>
 
-#include "angles/angles.h"
 #include "nav2_core/goal_checker.hpp"
 #include "orca_nav2/param_macro.hpp"
 
