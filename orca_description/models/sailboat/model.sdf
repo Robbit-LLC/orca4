@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<sdf version="1.6">
+    <model name="sailboat">
+        <static>true</static>
+        <link name="sailboat_link">
+            <!-- TODO: Check why this does not work -->
+            <!-- <collision name="sailboat_collision">
+                <geometry>
+                    <mesh>
+                        <uri>model://sailboat/meshes/sail.dae</uri>
+                        <scale>0.15 0.15 0.15</scale>
+                    </mesh>
+                </geometry>
+            </collision> -->
+
+            <visual name="sailboat_visual">
+                <geometry>
+                    <mesh>
+                        <uri>model://sailboat/meshes/sail.dae</uri>
+                        <scale>0.15 0.15 0.15</scale>
+                    </mesh>
+                </geometry>
+            </visual>
+        </link>
+    </model>
+</sdf>
