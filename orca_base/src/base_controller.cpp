@@ -24,15 +24,15 @@
 #include <string>
 #include <utility>
 
-#include "geographic_msgs/msg/geo_pose_stamped.hpp" // IWYU pragma: keep
-#include "mavros_msgs/msg/override_rc_in.hpp" // IWYU pragma: keep
-#include "nav_msgs/msg/odometry.hpp" // IWYU pragma: keep
+#include "geographic_msgs/msg/geo_pose_stamped.hpp"  // IWYU pragma: keep
+#include "mavros_msgs/msg/override_rc_in.hpp"        // IWYU pragma: keep
+#include "nav_msgs/msg/odometry.hpp"                 // IWYU pragma: keep
 #include "orca_base/underwater_motion.hpp"
-#include "orca_shared/model.hpp" // IWYU pragma: keep
+#include "orca_shared/model.hpp"  // IWYU pragma: keep
 #include "orca_shared/pwm.hpp"
 #include "orca_shared/util.hpp"
-#include "rclcpp/rclcpp.hpp" // IWYU pragma: keep
-#include "std_srvs/srv/set_bool.hpp" // IWYU pragma: keep
+#include "rclcpp/rclcpp.hpp"          // IWYU pragma: keep
+#include "std_srvs/srv/set_bool.hpp"  // IWYU pragma: keep
 #include "tf2_ros/transform_broadcaster.h"
 #include "tf2_ros/transform_listener.h"
 
@@ -49,8 +49,8 @@ class BaseController : public rclcpp::Node
 {
   // Parameters
   BaseContext cxt_;
-  rclcpp::Duration slam_timeout_{std::chrono::milliseconds{0}};
-  rclcpp::Duration transform_expiration_{std::chrono::milliseconds{0}};
+  rclcpp::Duration slam_timeout_{ std::chrono::milliseconds{ 0 } };
+  rclcpp::Duration transform_expiration_{ std::chrono::milliseconds{ 0 } };
 
   enum class State
   {
@@ -61,36 +61,44 @@ class BaseController : public rclcpp::Node
     RUN_NOT_LOCALIZED,  // Running, have a map, not localized (dead reckoning)
   };
 
-  static const char * state_name(State state)
+  static const char* state_name(State state)
   {
-    if (state == State::BOOT) {
+    if (state == State::BOOT)
+    {
       return "BOOT";
-    } else if (state == State::HAVE_TF) {
+    }
+    else if (state == State::HAVE_TF)
+    {
       return "HAVE_TF";
-    } else if (state == State::RUN_NO_MAP) {
+    }
+    else if (state == State::RUN_NO_MAP)
+    {
       return "RUN_NO_MAP";
-    } else if (state == State::RUN_LOCALIZED) {
+    }
+    else if (state == State::RUN_LOCALIZED)
+    {
       return "RUN_LOCALIZED";
-    } else {
+    }
+    else
+    {
       return "RUN_NOT_LOCALIZED";
     }
   }
 
-  State state_{State::BOOT};
+  State state_{ State::BOOT };
 
   bool running() const
   {
-    return state_ == State::RUN_NO_MAP || state_ == State::RUN_LOCALIZED ||
-           state_ == State::RUN_NOT_LOCALIZED;
+    return state_ == State::RUN_NO_MAP || state_ == State::RUN_LOCALIZED || state_ == State::RUN_NOT_LOCALIZED;
   }
 
   // We are in control
-  bool conn_{false};
+  bool conn_{ false };
 
   // Most recent messages
-  geometry_msgs::msg::PoseStamped ardu_pose_;   // Pose from ArduSub EKF
-  rclcpp::Time slam_pose_time_;                 // Time of SLAM pose
-  geometry_msgs::msg::Twist cmd_vel_;           // Twist from Nav2
+  geometry_msgs::msg::PoseStamped ardu_pose_;  // Pose from ArduSub EKF
+  rclcpp::Time slam_pose_time_;                // Time of SLAM pose
+  geometry_msgs::msg::Twist cmd_vel_;          // Twist from Nav2
 
   // Motion model
   std::unique_ptr<UnderwaterMotion> underwater_motion_;
@@ -131,7 +139,7 @@ class BaseController : public rclcpp::Node
   std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
   std::unique_ptr<tf2_ros::TransformListener> tf_listener_;
 
-  void change_state(const char * message, State new_state)
+  void change_state(const char* message, State new_state)
   {
     RCLCPP_INFO(get_logger(), "%s, state => %s", message, state_name(new_state));
     state_ = new_state;
@@ -140,23 +148,24 @@ class BaseController : public rclcpp::Node
   bool get_static_transforms()
   {
     if (tf_buffer_->canTransform(cxt_.slam_frame_id_, cxt_.down_frame_id_, tf2::TimePointZero) &&
-      tf_buffer_->canTransform(cxt_.base_frame_id_, cxt_.camera_frame_id_, tf2::TimePointZero))
+        tf_buffer_->canTransform(cxt_.base_frame_id_, cxt_.camera_frame_id_, tf2::TimePointZero))
     {
       tf_slam_down_ = orca::transform_msg_to_transform(
-        tf_buffer_->lookupTransform(
-          cxt_.slam_frame_id_, cxt_.down_frame_id_, tf2::TimePointZero));
+          tf_buffer_->lookupTransform(cxt_.slam_frame_id_, cxt_.down_frame_id_, tf2::TimePointZero));
 
       tf_cam_base_ = orca::transform_msg_to_transform(
-        tf_buffer_->lookupTransform(
-          cxt_.base_frame_id_, cxt_.camera_frame_id_, tf2::TimePointZero)).inverse();
+                         tf_buffer_->lookupTransform(cxt_.base_frame_id_, cxt_.camera_frame_id_, tf2::TimePointZero))
+                         .inverse();
 
       return true;
-    } else {
+    }
+    else
+    {
       return false;
     }
   }
 
-  void publish_tf(std::string parent, std::string child, const tf2::Transform & tf)
+  void publish_tf(std::string parent, std::string child, const tf2::Transform& tf)
   {
     geometry_msgs::msg::TransformStamped tm;
     tm.header.frame_id = std::move(parent);
@@ -167,7 +176,7 @@ class BaseController : public rclcpp::Node
     tf_broadcaster_->sendTransform(tm);
   }
 
-  void publish_ext_nav(const tf2::Transform & ext_nav) const
+  void publish_ext_nav(const tf2::Transform& ext_nav) const
   {
     geometry_msgs::msg::PoseStamped ext_nav_msg;
     ext_nav_msg.header.stamp = now();
@@ -190,30 +199,26 @@ class BaseController : public rclcpp::Node
 
   void publish_rc() const
   {
-    if (rc_pub_->get_subscription_count() > 0) {
+    if (rc_pub_->get_subscription_count() > 0)
+    {
       mavros_msgs::msg::OverrideRCIn msg;
 
       // Most channels are not affected
-      for (uint16_t & channel : msg.channels) {
+      for (uint16_t& channel : msg.channels)
+      {
         channel = mavros_msgs::msg::OverrideRCIn::CHAN_NOCHANGE;
       }
 
       // https://www.ardusub.com/developers/rc-input-and-output.html
 
       // Forward (>1500 is forward)
-      msg.channels[5 - 1] = orca::effort_to_pwm(
-        cxt_.mdl_thrust_dz_pwm_,
-        underwater_motion_->motion().effort.force.x);
+      msg.channels[5 - 1] = orca::effort_to_pwm(cxt_.mdl_thrust_dz_pwm_, underwater_motion_->motion().effort.force.x);
 
       // Lateral (>1500 is to the right when viewed top-down, so flip the sign)
-      msg.channels[6 - 1] = orca::effort_to_pwm(
-        cxt_.mdl_thrust_dz_pwm_,
-        -underwater_motion_->motion().effort.force.y);
+      msg.channels[6 - 1] = orca::effort_to_pwm(cxt_.mdl_thrust_dz_pwm_, -underwater_motion_->motion().effort.force.y);
 
       // Yaw (>1500 is clockwise when viewed top-down, so flip the sign)
-      msg.channels[4 - 1] = orca::effort_to_pwm(
-        cxt_.mdl_thrust_dz_pwm_,
-        -underwater_motion_->motion().effort.torque.z);
+      msg.channels[4 - 1] = orca::effort_to_pwm(cxt_.mdl_thrust_dz_pwm_, -underwater_motion_->motion().effort.torque.z);
 
       rc_pub_->publish(msg);
     }
@@ -221,13 +226,15 @@ class BaseController : public rclcpp::Node
 
   void timer_cb()
   {
-    if (running()) {
-      if (!underwater_motion_) {
+    if (running())
+    {
+      if (!underwater_motion_)
+      {
         // Initialize underwater motion from the EKF pose
-        underwater_motion_ = std::make_unique<UnderwaterMotion>(
-          now(),
-          get_logger(), cxt_, ardu_pose_.pose);
-      } else {
+        underwater_motion_ = std::make_unique<UnderwaterMotion>(now(), get_logger(), cxt_, ardu_pose_.pose);
+      }
+      else
+      {
         // Update motion from t-(1/rate) to t
         underwater_motion_->update(now(), cmd_vel_);
       }
@@ -238,7 +245,8 @@ class BaseController : public rclcpp::Node
       motion_pub_->publish(underwater_motion_->motion());
       odom_pub_->publish(underwater_motion_->odometry());
 
-      if (conn_) {
+      if (conn_)
+      {
         publish_rc();
         publish_setpoint();
       }
@@ -250,16 +258,22 @@ class BaseController : public rclcpp::Node
     publish_tf(cxt_.odom_frame_id_, cxt_.base_frame_id_, tf_odom_base_);
 
     // If we don't have a SLAM pose, send odom as external navigation to the EKF
-    if (state_ == State::RUN_NOT_LOCALIZED) {
+    if (state_ == State::RUN_NOT_LOCALIZED)
+    {
       publish_ext_nav(tf_map_odom_ * tf_odom_base_);
-    } else if (state_ != State::RUN_LOCALIZED) {
+    }
+    else if (state_ != State::RUN_LOCALIZED)
+    {
       publish_ext_nav(tf_odom_base_);
     }
 
     // State changes
-    if (state_ == State::BOOT && get_static_transforms()) {
+    if (state_ == State::BOOT && get_static_transforms())
+    {
       change_state("found static transforms", State::HAVE_TF);
-    } else if (state_ == State::RUN_LOCALIZED && now() - slam_pose_time_ > slam_timeout_) {
+    }
+    else if (state_ == State::RUN_LOCALIZED && now() - slam_pose_time_ > slam_timeout_)
+    {
       change_state("SLAM timeout", State::RUN_NOT_LOCALIZED);
     }
   }
@@ -267,15 +281,19 @@ class BaseController : public rclcpp::Node
   // Output from ArduSub EKF. Troubleshooting tip: if this message never appears, make sure that
   // the mavros and mavros_extras packages are installed and that all required MAVROS plugins are
   // were loaded.
-  void ardu_pose_cb(const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg)
+  void ardu_pose_cb(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg)
   {
-    if (state_ != State::BOOT) {
+    if (state_ != State::BOOT)
+    {
       ardu_pose_ = *msg;
-      if (state_ == State::RUN_LOCALIZED) {
+      if (state_ == State::RUN_LOCALIZED)
+      {
         // The entire pose is usable
         auto tf_map_base = orca::pose_msg_to_transform(ardu_pose_.pose);
         tf_map_odom_ = tf_map_base * tf_base_odom_;
-      } else {
+      }
+      else
+      {
         // Only position.z is usable
         auto tmb_z = ardu_pose_.pose.position.z;
         auto tob_z = tf_odom_base_.getOrigin().z();
@@ -283,22 +301,25 @@ class BaseController : public rclcpp::Node
         tf_map_odom_.getOrigin().setZ(tmo_z);
       }
 
-      if (state_ == State::HAVE_TF) {
+      if (state_ == State::HAVE_TF)
+      {
         change_state("EKF is running", State::RUN_NO_MAP);
       }
     }
   }
 
   // Output from SLAM system
-  void slam_pose_cb(const geometry_msgs::msg::PoseStamped::ConstSharedPtr & msg)
+  void slam_pose_cb(const geometry_msgs::msg::PoseStamped::ConstSharedPtr& msg)
   {
     slam_pose_time_ = msg->header.stamp;
 
-    if (running()) {
+    if (running())
+    {
       auto tf_orb_cam = orca::pose_msg_to_transform(msg->pose);
       auto tf_slam_base = tf_slam_down_ * tf_orb_cam * tf_cam_base_;
 
-      if (state_ == State::RUN_NO_MAP) {
+      if (state_ == State::RUN_NO_MAP)
+      {
         // This is our first SLAM pose, so set tf_map_slam. Note that the SLAM pose is unfiltered.
         // Future: average N SLAM poses.
         tf_map_slam_ = tf_map_odom_ * tf_odom_base_ * tf_slam_base.inverse();
@@ -308,9 +329,12 @@ class BaseController : public rclcpp::Node
       // Send to ArduSub EKF
       publish_ext_nav(tf_map_slam_ * tf_slam_base);
 
-      if (state_ == State::RUN_NO_MAP) {
+      if (state_ == State::RUN_NO_MAP)
+      {
         change_state("map created", State::RUN_LOCALIZED);
-      } else if (state_ == State::RUN_NOT_LOCALIZED) {
+      }
+      else if (state_ == State::RUN_NOT_LOCALIZED)
+      {
         change_state("re-localized", State::RUN_LOCALIZED);
       }
     }
@@ -318,14 +342,10 @@ class BaseController : public rclcpp::Node
 
   void validate_parameters()
   {
-    slam_timeout_ = {std::chrono::milliseconds{cxt_.slam_timeout_ms_}};
-    transform_expiration_ = {std::chrono::milliseconds{cxt_.transform_expiration_ms_}};
+    slam_timeout_ = { std::chrono::milliseconds{ cxt_.slam_timeout_ms_ } };
+    transform_expiration_ = { std::chrono::milliseconds{ cxt_.transform_expiration_ms_ } };
 
-    timer_ = create_wall_timer(
-      std::chrono::milliseconds(1000 / cxt_.timer_rate_), [this]
-      {
-        timer_cb();
-      });
+    timer_ = create_wall_timer(std::chrono::milliseconds(1000 / cxt_.timer_rate_), [this] { timer_cb(); });
   }
 
   void init_parameters()
@@ -352,14 +372,13 @@ class BaseController : public rclcpp::Node
   }
 
 public:
-  BaseController()
-  : Node("base_controller")
+  BaseController() : Node("base_controller")
   {
     // Suppress IDE warnings
-    (void) cmd_vel_sub_;
-    (void) conn_srv_;
-    (void) ardu_pose_sub_;
-    (void) timer_;
+    (void)cmd_vel_sub_;
+    (void)conn_srv_;
+    (void)ardu_pose_sub_;
+    (void)timer_;
 
     init_parameters();
 
@@ -386,58 +405,46 @@ public:
     rclcpp::QoS reliable(10);
     reliable.reliable();
 
-    ext_nav_pub_ = create_publisher<geometry_msgs::msg::PoseStamped>(
-      "/mavros/vision_pose/pose",
-      reliable);
+    ext_nav_pub_ = create_publisher<geometry_msgs::msg::PoseStamped>("/mavros/vision_pose/pose", reliable);
     motion_pub_ = create_publisher<orca_msgs::msg::Motion>("motion", reliable);
     odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("odom", reliable);
     rc_pub_ = create_publisher<mavros_msgs::msg::OverrideRCIn>("/mavros/rc/override", reliable);
 
     // Mavros listens to /mavros/setpoint_position/global with best_effort QoS
-    setpoint_pub_ = create_publisher<geographic_msgs::msg::GeoPoseStamped>(
-      "/mavros/setpoint_position/global", best_effort);
+    setpoint_pub_ =
+        create_publisher<geographic_msgs::msg::GeoPoseStamped>("/mavros/setpoint_position/global", best_effort);
 
     conn_srv_ = create_service<std_srvs::srv::SetBool>(
-      "conn",
-      [this](
-        const std::shared_ptr<rmw_request_id_t>,
-        const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
-        std::shared_ptr<std_srvs::srv::SetBool::Response> response)
-      {
-        if (conn_ != request->data) {
-          if (request->data) {
-            RCLCPP_INFO(get_logger(), "reset odometry and start driving");
-            underwater_motion_.reset();
-          } else {
-            RCLCPP_INFO(get_logger(), "stop driving");
-            cmd_vel_ = geometry_msgs::msg::Twist{};
+        "conn",
+        [this](const std::shared_ptr<rmw_request_id_t>, const std::shared_ptr<std_srvs::srv::SetBool::Request> request,
+               std::shared_ptr<std_srvs::srv::SetBool::Response> response) {
+          if (conn_ != request->data)
+          {
+            if (request->data)
+            {
+              RCLCPP_INFO(get_logger(), "reset odometry and start driving");
+              underwater_motion_.reset();
+            }
+            else
+            {
+              RCLCPP_INFO(get_logger(), "stop driving");
+              cmd_vel_ = geometry_msgs::msg::Twist{};
+            }
+            conn_ = request->data;
           }
-          conn_ = request->data;
-        }
-        response->success = true;
-      },
-      rmw_qos_profile_services_default);
+          response->success = true;
+        },
+        rmw_qos_profile_services_default);
 
     cmd_vel_sub_ = create_subscription<geometry_msgs::msg::Twist>(
-      "cmd_vel", reliable,
-      [this](geometry_msgs::msg::Twist::ConstSharedPtr msg)
-      {
-        cmd_vel_ = *msg;
-      });
+        "cmd_vel", reliable, [this](geometry_msgs::msg::Twist::ConstSharedPtr msg) { cmd_vel_ = *msg; });
 
     ardu_pose_sub_ = create_subscription<geometry_msgs::msg::PoseStamped>(
-      "/mavros/local_position/pose", best_effort,
-      [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
-      {
-        ardu_pose_cb(msg);
-      });
+        "/mavros/local_position/pose", best_effort,
+        [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) { ardu_pose_cb(msg); });
 
     slam_pose_sub_ = create_subscription<geometry_msgs::msg::PoseStamped>(
-      "camera_pose", reliable,
-      [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg)
-      {
-        slam_pose_cb(msg);
-      });
+        "camera_pose", reliable, [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr msg) { slam_pose_cb(msg); });
 
     RCLCPP_INFO(get_logger(), "base_controller ready");
   }
@@ -449,7 +456,7 @@ public:
 // Main
 //=============================================================================
 
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
   setvbuf(stdout, nullptr, _IONBF, BUFSIZ);
   rclcpp::init(argc, argv);

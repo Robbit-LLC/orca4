@@ -36,13 +36,13 @@ class ProgressChecker3D : public nav2_core::ProgressChecker
   // Progress is defined as moving by more than radius_ w/in the time_allowance_
   double radius_{};
   double time_allowance_{};
-  rclcpp::Duration time_allowance_d_{0, 0};
+  rclcpp::Duration time_allowance_d_{ 0, 0 };
 
   geometry_msgs::msg::Pose baseline_;
   rclcpp::Time baseline_time_;
-  bool baseline_set_{false};
+  bool baseline_set_{ false };
 
-  void set_baseline(const geometry_msgs::msg::Pose & pose)
+  void set_baseline(const geometry_msgs::msg::Pose& pose)
   {
     baseline_ = pose;
     baseline_time_ = clock_->now();
@@ -50,9 +50,7 @@ class ProgressChecker3D : public nav2_core::ProgressChecker
   }
 
 public:
-  void initialize(
-    const rclcpp_lifecycle::LifecycleNode::WeakPtr & weak_parent,
-    const std::string & plugin_name) override
+  void initialize(const rclcpp_lifecycle::LifecycleNode::WeakPtr& weak_parent, const std::string& plugin_name) override
   {
     auto parent = weak_parent.lock();
 
@@ -66,9 +64,10 @@ public:
     RCLCPP_INFO(parent->get_logger(), "ProgressChecker3D configured");
   }
 
-  bool check(geometry_msgs::msg::PoseStamped & pose) override
+  bool check(geometry_msgs::msg::PoseStamped& pose) override
   {
-    if (!baseline_set_ || orca::dist(pose.pose.position, baseline_.position) > radius_) {
+    if (!baseline_set_ || orca::dist(pose.pose.position, baseline_.position) > radius_)
+    {
       set_baseline(pose.pose);
       return true;
     }

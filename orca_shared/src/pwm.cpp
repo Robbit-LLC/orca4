@@ -29,31 +29,22 @@ namespace orca
 
 uint16_t tilt_to_pwm(const int tilt)
 {
-  return orca::scale(
-    tilt, TILT_MIN, TILT_MAX,
-    PWM_TILT_45_UP, PWM_TILT_45_DOWN);
+  return orca::scale(tilt, TILT_MIN, TILT_MAX, PWM_TILT_45_UP, PWM_TILT_45_DOWN);
 }
 
 int pwm_to_tilt(const uint16_t pwm)
 {
-  return orca::scale(
-    pwm, PWM_TILT_45_UP,
-    PWM_TILT_45_DOWN,
-    TILT_MIN, TILT_MAX);
+  return orca::scale(pwm, PWM_TILT_45_UP, PWM_TILT_45_DOWN, TILT_MIN, TILT_MAX);
 }
 
 uint16_t brightness_to_pwm(const int brightness)
 {
-  return orca::scale(
-    brightness, BRIGHTNESS_MIN, BRIGHTNESS_MAX,
-    PWM_LIGHTS_OFF, PWM_LIGHTS_FULL);
+  return orca::scale(brightness, BRIGHTNESS_MIN, BRIGHTNESS_MAX, PWM_LIGHTS_OFF, PWM_LIGHTS_FULL);
 }
 
 int pwm_to_brightness(const uint16_t pwm)
 {
-  return orca::scale(
-    pwm, PWM_LIGHTS_OFF, PWM_LIGHTS_FULL,
-    BRIGHTNESS_MIN, BRIGHTNESS_MAX);
+  return orca::scale(pwm, PWM_LIGHTS_OFF, PWM_LIGHTS_FULL, BRIGHTNESS_MIN, BRIGHTNESS_MAX);
 }
 
 uint16_t effort_to_pwm(const uint16_t thrust_dz_pwm, const double effort)
@@ -61,22 +52,18 @@ uint16_t effort_to_pwm(const uint16_t thrust_dz_pwm, const double effort)
   uint16_t thrust_range_pwm = 400 - thrust_dz_pwm;
 
   return clamp(
-    static_cast<uint16_t>(PWM_THRUST_STOP +
-    (effort > THRUST_STOP ? thrust_dz_pwm : (effort < THRUST_STOP ?
-    -thrust_dz_pwm : 0)) +
-    std::round(effort * thrust_range_pwm)),
-    PWM_THRUST_FULL_REV,
-    PWM_THRUST_FULL_FWD);
+      static_cast<uint16_t>(PWM_THRUST_STOP +
+                            (effort > THRUST_STOP ? thrust_dz_pwm : (effort < THRUST_STOP ? -thrust_dz_pwm : 0)) +
+                            std::round(effort * thrust_range_pwm)),
+      PWM_THRUST_FULL_REV, PWM_THRUST_FULL_FWD);
 }
 
 double pwm_to_effort(const uint16_t thrust_dz_pwm, const uint16_t pwm)
 {
   uint16_t thrust_range_pwm = 400 - thrust_dz_pwm;
 
-  return static_cast<double>(
-    pwm - PWM_THRUST_STOP +
-    (pwm > PWM_THRUST_STOP ? -thrust_dz_pwm :
-    (pwm < PWM_THRUST_STOP ? thrust_dz_pwm : 0))) /
+  return static_cast<double>(pwm - PWM_THRUST_STOP +
+                             (pwm > PWM_THRUST_STOP ? -thrust_dz_pwm : (pwm < PWM_THRUST_STOP ? thrust_dz_pwm : 0))) /
          thrust_range_pwm;
 }
 

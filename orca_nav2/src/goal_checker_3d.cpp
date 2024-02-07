@@ -27,9 +27,9 @@
 #include "orca_nav2/param_macro.hpp"
 
 /***
-* Waiting for PurePursuitController3D to finish decelerating makes the interaction between
-* progress_checker & goal_checker somewhat fragile and generally slows down navigation.
-*/
+ * Waiting for PurePursuitController3D to finish decelerating makes the interaction between
+ * progress_checker & goal_checker somewhat fragile and generally slows down navigation.
+ */
 #undef WAIT_FOR_DECEL
 
 namespace orca_nav2
@@ -48,10 +48,8 @@ class GoalChecker3D : public nav2_core::GoalChecker
 #endif
 
 public:
-  void initialize(
-    const rclcpp_lifecycle::LifecycleNode::WeakPtr & weak_parent,
-    const std::string & plugin_name,
-    const std::shared_ptr<nav2_costmap_2d::Costmap2DROS>) override
+  void initialize(const rclcpp_lifecycle::LifecycleNode::WeakPtr& weak_parent, const std::string& plugin_name,
+                  const std::shared_ptr<nav2_costmap_2d::Costmap2DROS>) override
   {
     auto parent = weak_parent.lock();
 
@@ -60,26 +58,25 @@ public:
 
 #ifdef WAIT_FOR_DECEL
     cmd_vel_sub_ = parent->create_subscription<geometry_msgs::msg::Twist>(
-      "cmd_vel", 1,
-      [this](geometry_msgs::msg::Twist::ConstSharedPtr msg) // NOLINT
-      {
-        cmd_vel_ = *msg;
-      });
+        "cmd_vel", 1,
+        [this](geometry_msgs::msg::Twist::ConstSharedPtr msg)  // NOLINT
+        { cmd_vel_ = *msg; });
 #endif
 
     RCLCPP_INFO(parent->get_logger(), "GoalChecker3D configured");
   }
 
-  void reset() override {}
+  void reset() override
+  {
+  }
 
-  bool isGoalReached(
-    const geometry_msgs::msg::Pose & query_pose,
-    const geometry_msgs::msg::Pose & goal_pose,
-    const geometry_msgs::msg::Twist &) override
+  bool isGoalReached(const geometry_msgs::msg::Pose& query_pose, const geometry_msgs::msg::Pose& goal_pose,
+                     const geometry_msgs::msg::Twist&) override
   {
 #ifdef WAIT_FOR_DECEL
     // Wait for PurePursuitController3D to finish decelerating
-    if (cmd_vel_.linear.x > 0 || cmd_vel_.linear.z > 0 || cmd_vel_.angular.z > 0) {
+    if (cmd_vel_.linear.x > 0 || cmd_vel_.linear.z > 0 || cmd_vel_.angular.z > 0)
+    {
       return false;
     }
 #endif
@@ -89,7 +86,8 @@ public:
     double dz = query_pose.position.z - goal_pose.position.z;
 
     // Check xy position
-    if (dx * dx + dy * dy > xy_goal_tolerance_ * xy_goal_tolerance_) {
+    if (dx * dx + dy * dy > xy_goal_tolerance_ * xy_goal_tolerance_)
+    {
       return false;
     }
 
@@ -98,9 +96,7 @@ public:
   }
 
   // Return tolerances for use by the controller (added in Galactic)
-  bool getTolerances(
-    geometry_msgs::msg::Pose & pose_tolerance,
-    geometry_msgs::msg::Twist & vel_tolerance) override
+  bool getTolerances(geometry_msgs::msg::Pose& pose_tolerance, geometry_msgs::msg::Twist& vel_tolerance) override
   {
     double invalid_field = std::numeric_limits<double>::lowest();
 

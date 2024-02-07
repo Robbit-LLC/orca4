@@ -113,7 +113,7 @@ control_offset = -0.5
 use_angvel_cmd = False
 
 # Set by update_globals()
-cw_control_multiplier = 0   # Thrusters 3, 4 and 6
+cw_control_multiplier = 0  # Thrusters 3, 4 and 6
 ccw_control_multiplier = 0  # Thrusters 1, 2 and 5
 thruster1_topic = "/model/orca4/joint/thruster1_joint/cmd_"
 thruster2_topic = "/model/orca4/joint/thruster2_joint/cmd_"
@@ -136,6 +136,7 @@ camera_ixx = 0.001
 camera_iyy = 0.001
 camera_izz = 0.001
 camera_far_clip = 4  # Furthest distance the camera can "see"
+
 
 # Fossen equation, see "Guidance and Control of Ocean Vehicles" p. 246
 def thrust_to_ang_vel(thrust):

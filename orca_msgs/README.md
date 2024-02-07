@@ -2,10 +2,10 @@
 
 ## Diagnostic Messages
 
-| Message | Description                                                          |
-|-----|----------------------------------------------------------------------|
-| Effort | Force and torque divided by maximum force and torque (range \[-1, 1\]) |
-| Motion | Output of motion model                                               |
+| Message | Description                                                            |
+|---------|------------------------------------------------------------------------|
+| Effort  | Force and torque divided by maximum force and torque (range \[-1, 1\]) |
+| Motion  | Output of motion model                                                 |
 
 ## Actions
 

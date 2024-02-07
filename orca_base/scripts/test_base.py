@@ -29,9 +29,9 @@ Usage:
 -- ros2 run orca_base test_base.py
 """
 
-from geometry_msgs.msg import Twist, Vector3
 import rclpy
 import rclpy.logging
+from geometry_msgs.msg import Twist, Vector3
 from rclpy.node import Node
 
 

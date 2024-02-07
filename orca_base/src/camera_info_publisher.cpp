@@ -24,17 +24,17 @@
 #include <string>
 
 #include "camera_info_manager/camera_info_manager.hpp"
-#include "rclcpp/rclcpp.hpp" // IWYU pragma: keep
+#include "rclcpp/rclcpp.hpp"  // IWYU pragma: keep
 #include "ros2_shared/context_macros.hpp"
 
 namespace orca_base
 {
 
-#define CAMERA_INFO_PARAMS \
-  CXT_MACRO_MEMBER(timer_period_ms, int, 1000) \
-  CXT_MACRO_MEMBER(camera_info_url, std::string, "/path/to/camera/info") \
-  CXT_MACRO_MEMBER(camera_name, std::string, "forward_camera") \
-  CXT_MACRO_MEMBER(frame_id, std::string, "forward_camera_frame") \
+#define CAMERA_INFO_PARAMS                                                                                             \
+  CXT_MACRO_MEMBER(timer_period_ms, int, 1000)                                                                         \
+  CXT_MACRO_MEMBER(camera_info_url, std::string, "/path/to/camera/info")                                               \
+  CXT_MACRO_MEMBER(camera_name, std::string, "forward_camera")                                                         \
+  CXT_MACRO_MEMBER(frame_id, std::string, "forward_camera_frame")                                                      \
   /* End of list */
 
 #undef CXT_MACRO_MEMBER
@@ -57,22 +57,23 @@ class CameraInfoPublisher : public rclcpp::Node
     camera_info_manager_ = std::make_unique<camera_info_manager::CameraInfoManager>(this);
     camera_info_manager_->setCameraName(cxt_.camera_name_);
 
-    if (camera_info_manager_->validateURL(cxt_.camera_info_url_)) {
+    if (camera_info_manager_->validateURL(cxt_.camera_info_url_))
+    {
       camera_info_manager_->loadCameraInfo(cxt_.camera_info_url_);
       RCLCPP_INFO(get_logger(), "Loaded camera info from %s", cxt_.camera_info_url_.c_str());
-    } else {
-      RCLCPP_ERROR(
-        get_logger(), "Camera info url '%s' is not valid, missing 'file://' prefix?",
-        cxt_.camera_info_url_.c_str());
+    }
+    else
+    {
+      RCLCPP_ERROR(get_logger(), "Camera info url '%s' is not valid, missing 'file://' prefix?",
+                   cxt_.camera_info_url_.c_str());
     }
   }
 
 public:
-  CameraInfoPublisher()
-  : Node("camera_info_publisher")
+  CameraInfoPublisher() : Node("camera_info_publisher")
   {
-    (void) camera_info_pub_;
-    (void) spin_timer_;
+    (void)camera_info_pub_;
+    (void)spin_timer_;
 
     // Get parameters, this will immediately call validate_parameters()
 #undef CXT_MACRO_MEMBER
@@ -96,20 +97,18 @@ public:
 
     camera_info_pub_ = create_publisher<sensor_msgs::msg::CameraInfo>("camera_info", 10);
 
-    spin_timer_ = create_wall_timer(
-      std::chrono::milliseconds{cxt_.timer_period_ms_}, [this]()
-      {
-        auto camera_info_msg = camera_info_manager_->getCameraInfo();
-        // camera_info_msg.header.stamp = now();
-        // camera_info_msg.header.frame_id = cxt_.frame_id_;
-        camera_info_pub_->publish(camera_info_msg);
-      });
+    spin_timer_ = create_wall_timer(std::chrono::milliseconds{ cxt_.timer_period_ms_ }, [this]() {
+      auto camera_info_msg = camera_info_manager_->getCameraInfo();
+      // camera_info_msg.header.stamp = now();
+      // camera_info_msg.header.frame_id = cxt_.frame_id_;
+      camera_info_pub_->publish(camera_info_msg);
+    });
   }
 };
 
 }  // namespace orca_base
 
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
   setvbuf(stdout, nullptr, _IONBF, BUFSIZ);
   rclcpp::init(argc, argv);

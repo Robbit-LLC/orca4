@@ -31,11 +31,10 @@ Usage:
 -- ros2 run orca_bringup mission_runner.py
 """
 
-from enum import Enum
-
 import rclpy
 import rclpy.logging
 from action_msgs.msg import GoalStatus
+from enum import Enum
 from geometry_msgs.msg import Point, Pose, PoseStamped
 from nav2_msgs.action import FollowWaypoints
 from orca_msgs.action import TargetMode
@@ -44,9 +43,9 @@ from std_msgs.msg import Header
 
 
 class SendGoalResult(Enum):
-    SUCCESS = 0     # Goal succeeded
-    FAILURE = 1     # Goal failed
-    CANCELED = 2    # Goal canceled (KeyboardInterrupt exception)
+    SUCCESS = 0  # Goal succeeded
+    FAILURE = 1  # Goal failed
+    CANCELED = 2  # Goal canceled (KeyboardInterrupt exception)
 
 
 def make_pose(x: float, y: float, z: float):

@@ -39,10 +39,9 @@ namespace orca_base
 // -- recovery controllers (spin, wait) interrupt PurePursuitController3D and may cause rapid
 //    acceleration or deceleration. These will be clamped.
 
-UnderwaterMotion::UnderwaterMotion(
-  const rclcpp::Time & t, const rclcpp::Logger & logger,
-  const BaseContext & cxt, const geometry_msgs::msg::Pose & initial_pose)
-: logger_{logger}, cxt_{cxt}
+UnderwaterMotion::UnderwaterMotion(const rclcpp::Time& t, const rclcpp::Logger& logger, const BaseContext& cxt,
+                                   const geometry_msgs::msg::Pose& initial_pose)
+  : logger_{ logger }, cxt_{ cxt }
 {
   motion_.header.stamp = t;
   motion_.header.frame_id = cxt_.odom_frame_id_;
@@ -51,9 +50,8 @@ UnderwaterMotion::UnderwaterMotion(
   motion_.pose.position.z = initial_pose.position.z;
   auto initial_yaw = orca::get_yaw(initial_pose.orientation);
   orca::set_yaw(motion_.pose.orientation, initial_yaw);
-  RCLCPP_INFO(
-    logger_, "initialize odometry to {{%g, %g, %g}, {0, 0, %g}}",
-    motion_.pose.position.x, motion_.pose.position.y, motion_.pose.position.z, initial_yaw);
+  RCLCPP_INFO(logger_, "initialize odometry to {{%g, %g, %g}, {0, 0, %g}}", motion_.pose.position.x,
+              motion_.pose.position.y, motion_.pose.position.z, initial_yaw);
 }
 
 // Loud vs quiet clamp functions
@@ -61,28 +59,28 @@ UnderwaterMotion::UnderwaterMotion(
 #define CLAMP(v, minmax) orca::clamp(v, minmax)
 constexpr double EPSILON = 0.00001;
 
-double
-UnderwaterMotion::report_and_clamp(const std::string &func, const std::string &name, double v, double minmax) const
+double UnderwaterMotion::report_and_clamp(const std::string& func, const std::string& name, double v,
+                                          double minmax) const
 {
-  if (v > minmax + EPSILON) {
-    RCLCPP_INFO(
-      logger_, "%s: {%s} %g too high, clamp to %g", func.c_str(), name.c_str(), v,
-      minmax);
+  if (v > minmax + EPSILON)
+  {
+    RCLCPP_INFO(logger_, "%s: {%s} %g too high, clamp to %g", func.c_str(), name.c_str(), v, minmax);
     return minmax;
-  } else if (v < -minmax - EPSILON) {
-    RCLCPP_INFO(
-      logger_, "%s: {%s} %g too low, clamp to %g", func.c_str(), name.c_str(), v,
-      -minmax);
+  }
+  else if (v < -minmax - EPSILON)
+  {
+    RCLCPP_INFO(logger_, "%s: {%s} %g too low, clamp to %g", func.c_str(), name.c_str(), v, -minmax);
     return -minmax;
-  } else {
+  }
+  else
+  {
     return v;
   }
 }
 
 // a = (v1 - v0) / dt
-geometry_msgs::msg::Accel UnderwaterMotion::calc_accel(
-  const geometry_msgs::msg::Twist & v0,
-  const geometry_msgs::msg::Twist & v1) const
+geometry_msgs::msg::Accel UnderwaterMotion::calc_accel(const geometry_msgs::msg::Twist& v0,
+                                                       const geometry_msgs::msg::Twist& v1) const
 {
   geometry_msgs::msg::Accel result;
   result.linear.x = CLAMP((v1.linear.x - v0.linear.x) / motion_.dt, cxt_.x_accel_);
@@ -93,9 +91,8 @@ geometry_msgs::msg::Accel UnderwaterMotion::calc_accel(
 }
 
 // v = v0 + a * dt
-geometry_msgs::msg::Twist UnderwaterMotion::calc_vel(
-  const geometry_msgs::msg::Twist & v0,
-  const geometry_msgs::msg::Accel & a) const
+geometry_msgs::msg::Twist UnderwaterMotion::calc_vel(const geometry_msgs::msg::Twist& v0,
+                                                     const geometry_msgs::msg::Accel& a) const
 {
   geometry_msgs::msg::Twist result;
   result.linear.x = CLAMP(v0.linear.x + a.linear.x * motion_.dt, cxt_.x_vel_);
@@ -106,9 +103,8 @@ geometry_msgs::msg::Twist UnderwaterMotion::calc_vel(
 }
 
 // p = p0 + v * dt
-geometry_msgs::msg::Pose UnderwaterMotion::calc_pose(
-  const geometry_msgs::msg::Pose & p0,
-  const geometry_msgs::msg::Twist & v) const
+geometry_msgs::msg::Pose UnderwaterMotion::calc_pose(const geometry_msgs::msg::Pose& p0,
+                                                     const geometry_msgs::msg::Twist& v) const
 {
   geometry_msgs::msg::Pose result;
   auto yaw = orca::get_yaw(p0.orientation);
@@ -118,7 +114,8 @@ geometry_msgs::msg::Pose UnderwaterMotion::calc_pose(
   yaw += v.angular.z * motion_.dt;
   orca::set_yaw(result.orientation, yaw);
 
-  if (result.position.z > 0) {
+  if (result.position.z > 0)
+  {
     // Don't go above the surface
     result.position.z = 0;
   }
@@ -128,14 +125,8 @@ geometry_msgs::msg::Pose UnderwaterMotion::calc_pose(
 
 nav_msgs::msg::Odometry UnderwaterMotion::odometry() const
 {
-  static std::array<double, 36> covariance{
-    1, 0, 0, 0, 0, 0,
-    0, 1, 0, 0, 0, 0,
-    0, 0, 1, 0, 0, 0,
-    0, 0, 0, 1, 0, 0,
-    0, 0, 0, 0, 1, 0,
-    0, 0, 0, 0, 0, 1
-  };
+  static std::array<double, 36> covariance{ 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+                                            0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1 };
 
   nav_msgs::msg::Odometry result;
   result.header.stamp = motion_.header.stamp;
@@ -143,29 +134,31 @@ nav_msgs::msg::Odometry UnderwaterMotion::odometry() const
   result.child_frame_id = cxt_.base_frame_id_;
   result.pose.pose = motion_.pose;
   result.pose.covariance = covariance;
-  result.twist.twist =
-    orca::robot_to_world_frame(motion_.vel, orca::get_yaw(motion_.pose.orientation));
+  result.twist.twist = orca::robot_to_world_frame(motion_.vel, orca::get_yaw(motion_.pose.orientation));
   result.twist.covariance = covariance;
   return result;
 }
 
 // Coast: if cmd_vel is 0, then force acceleration to 0. Only applies to x, y and yaw.
 // Helpful for some ROV operations. TODO(clyde)
-void coast(const geometry_msgs::msg::Twist & cmd_vel, geometry_msgs::msg::Accel & model_plus_drag)
+void coast(const geometry_msgs::msg::Twist& cmd_vel, geometry_msgs::msg::Accel& model_plus_drag)
 {
   static double epsilon = 0.01;
-  if (std::abs(cmd_vel.linear.x) < epsilon) {
+  if (std::abs(cmd_vel.linear.x) < epsilon)
+  {
     model_plus_drag.linear.x = 0;
   }
-  if (std::abs(cmd_vel.linear.y) < epsilon) {
+  if (std::abs(cmd_vel.linear.y) < epsilon)
+  {
     model_plus_drag.linear.y = 0;
   }
-  if (std::abs(cmd_vel.angular.z) < epsilon) {
+  if (std::abs(cmd_vel.angular.z) < epsilon)
+  {
     model_plus_drag.angular.z = 0;
   }
 }
 
-void UnderwaterMotion::update(const rclcpp::Time & t, const geometry_msgs::msg::Twist & cmd_vel)
+void UnderwaterMotion::update(const rclcpp::Time& t, const geometry_msgs::msg::Twist& cmd_vel)
 {
   motion_.header.stamp = t;
   motion_.dt = 1.0 / cxt_.timer_rate_;
@@ -185,7 +178,8 @@ void UnderwaterMotion::update(const rclcpp::Time & t, const geometry_msgs::msg::
   auto accel_total = motion_.accel_model + motion_.accel_drag;
 
   // Experiment for ROV operations
-  if (cxt_.coast_) {
+  if (cxt_.coast_)
+  {
     coast(cmd_vel, accel_total);
   }
 

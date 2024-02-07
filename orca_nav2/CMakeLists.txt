@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.12.2)
 project(orca_nav2)
 
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 17)
-endif()
+if (NOT CMAKE_CXX_STANDARD)
+    set(CMAKE_CXX_STANDARD 17)
+endif ()
 
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  add_compile_options(-Wall -Wextra -Wpedantic)
-endif()
+if (CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif ()
 
 find_package(ament_cmake_auto REQUIRED)
 ament_auto_find_build_dependencies()
@@ -33,18 +33,18 @@ target_compile_definitions(progress_checker_3d PUBLIC "PLUGINLIB__DISABLE_BOOST_
 pluginlib_export_plugin_description_file(nav2_core progress_checker_3d_plugin.xml)
 
 # Load & run linters listed in package.xml
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  ament_lint_auto_find_test_dependencies()
-endif()
+if (BUILD_TESTING)
+    find_package(ament_lint_auto REQUIRED)
+    ament_lint_auto_find_test_dependencies()
+endif ()
 
 install(
-  FILES
-  pure_pursuit_controller_3d_plugin.xml
-  straight_line_planner_3d_plugin.xml
-  goal_checker_3d_plugin.xml
-  progress_checker_3d_plugin.xml
-  DESTINATION share/${PROJECT_NAME}
+        FILES
+        pure_pursuit_controller_3d_plugin.xml
+        straight_line_planner_3d_plugin.xml
+        goal_checker_3d_plugin.xml
+        progress_checker_3d_plugin.xml
+        DESTINATION share/${PROJECT_NAME}
 )
 
 ament_auto_package()

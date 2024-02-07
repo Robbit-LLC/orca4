@@ -2,7 +2,7 @@
 
 manager:
   ros__parameters:
-    mav_msg_ids: [31, 32]
+    mav_msg_ids: [ 31, 32 ]
     mav_msg_rate: 20
 
 base_controller:

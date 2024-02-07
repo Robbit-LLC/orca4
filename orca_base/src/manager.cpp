@@ -25,17 +25,17 @@
 #include <string>
 #include <vector>
 
-#include "geometry_msgs/msg/pose_stamped.hpp" // IWYU pragma: keep
-#include "mavros_msgs/msg/state.hpp" // IWYU pragma: keep
-#include "mavros_msgs/srv/command_bool.hpp" // IWYU pragma: keep
-#include "mavros_msgs/srv/message_interval.hpp" // IWYU pragma: keep
-#include "mavros_msgs/srv/set_mode.hpp" // IWYU pragma: keep
-#include "nav2_msgs/srv/manage_lifecycle_nodes.hpp" // IWYU pragma: keep
+#include "geometry_msgs/msg/pose_stamped.hpp"        // IWYU pragma: keep
+#include "mavros_msgs/msg/state.hpp"                 // IWYU pragma: keep
+#include "mavros_msgs/srv/command_bool.hpp"          // IWYU pragma: keep
+#include "mavros_msgs/srv/message_interval.hpp"      // IWYU pragma: keep
+#include "mavros_msgs/srv/set_mode.hpp"              // IWYU pragma: keep
+#include "nav2_msgs/srv/manage_lifecycle_nodes.hpp"  // IWYU pragma: keep
 #include "nav2_util/service_client.hpp"
-#include "orca_msgs/action/target_mode.hpp" // IWYU pragma: keep
-#include "rclcpp/rclcpp.hpp" // IWYU pragma: keep
-#include "rclcpp_action/rclcpp_action.hpp" // IWYU pragma: keep
-#include "std_srvs/srv/set_bool.hpp" // IWYU pragma: keep
+#include "orca_msgs/action/target_mode.hpp"  // IWYU pragma: keep
+#include "rclcpp/rclcpp.hpp"                 // IWYU pragma: keep
+#include "rclcpp_action/rclcpp_action.hpp"   // IWYU pragma: keep
+#include "std_srvs/srv/set_bool.hpp"         // IWYU pragma: keep
 
 namespace orca_base
 {
@@ -69,8 +69,8 @@ class Manager : public rclcpp::Node
   // The transition from current_mode to target_mode might take some time, e.g., we might have
   // to wait for the ArduSub EKF to warm up
   std::shared_ptr<GoalHandleTargetMode> goal_handle_;
-  uint8_t current_mode_{TargetMode::Goal::ORCA_MODE_DISARMED};
-  uint8_t target_mode_{TargetMode::Goal::ORCA_MODE_DISARMED};
+  uint8_t current_mode_{ TargetMode::Goal::ORCA_MODE_DISARMED };
+  uint8_t target_mode_{ TargetMode::Goal::ORCA_MODE_DISARMED };
 
   // State
   bool ardusub_connected_{};
@@ -91,8 +91,7 @@ class Manager : public rclcpp::Node
   // Services called by this node
   std::shared_ptr<nav2_util::ServiceClient<mavros_msgs::srv::CommandBool>> mavros_arm_client_;
   std::shared_ptr<nav2_util::ServiceClient<mavros_msgs::srv::SetMode>> mavros_set_mode_client_;
-  std::shared_ptr<nav2_util::ServiceClient<mavros_msgs::srv::MessageInterval>>
-  mavros_set_msg_interval_client_;
+  std::shared_ptr<nav2_util::ServiceClient<mavros_msgs::srv::MessageInterval>> mavros_set_msg_interval_client_;
   std::shared_ptr<nav2_util::ServiceClient<nav2_msgs::srv::ManageLifecycleNodes>> nav2_mgr_client_;
   std::shared_ptr<nav2_util::ServiceClient<std_srvs::srv::SetBool>> base_client_;
 
@@ -113,7 +112,7 @@ class Manager : public rclcpp::Node
     return result;
   }
 
-  bool set_ardusub_mode(uint8_t base_mode, const std::string & custom_mode) const
+  bool set_ardusub_mode(uint8_t base_mode, const std::string& custom_mode) const
   {
     auto request = std::make_shared<mavros_msgs::srv::SetMode::Request>();
     auto response = std::make_shared<mavros_msgs::srv::SetMode::Response>();
@@ -134,9 +133,7 @@ class Manager : public rclcpp::Node
     request->message_id = msg_id;
     request->message_rate = static_cast<float>(mav_msg_rate_);
 
-    RCLCPP_DEBUG(
-      get_logger(), "set message rate for %d to %g hz",
-      request->message_id, request->message_rate);
+    RCLCPP_DEBUG(get_logger(), "set message rate for %d to %g hz", request->message_id, request->message_rate);
 
     return mavros_set_msg_interval_client_->invoke(request, response) && response->success;
   }
@@ -145,7 +142,8 @@ class Manager : public rclcpp::Node
   {
     RCLCPP_INFO_ONCE(get_logger(), "setting message rates to %ld hz every 10s", mav_msg_rate_);
 
-    for (auto msg_id : mav_msg_ids_) {
+    for (auto msg_id : mav_msg_ids_)
+    {
       set_message_rate(static_cast<uint8_t>(msg_id));
     }
   }
@@ -178,35 +176,42 @@ class Manager : public rclcpp::Node
 
   void go_auv()
   {
-    if (ardusub_connected_ && have_pose_) {
-      if (!ardusub_armed_) {
+    if (ardusub_connected_ && have_pose_)
+    {
+      if (!ardusub_armed_)
+      {
         set_arm(true);
       }
 
-      if (ardusub_mode_ != ARDUSUB_MODE_ALT_HOLD) {
+      if (ardusub_mode_ != ARDUSUB_MODE_ALT_HOLD)
+      {
         set_ardusub_mode(0, ARDUSUB_MODE_ALT_HOLD);
       }
 
-      if (!base_driving_) {
-        if (call_base(true)) {
+      if (!base_driving_)
+      {
+        if (call_base(true))
+        {
           base_driving_ = true;
         }
       }
 
-      if (!nav2_active_) {
-        if (call_nav2(nav2_msgs::srv::ManageLifecycleNodes::Request::STARTUP)) {
+      if (!nav2_active_)
+      {
+        if (call_nav2(nav2_msgs::srv::ManageLifecycleNodes::Request::STARTUP))
+        {
           nav2_active_ = true;
         }
       }
 
       // We are in AUV mode when all of these things are true
       // The mode_timer will keep trying until this happens
-      if (ardusub_armed_ && ardusub_mode_ == ARDUSUB_MODE_ALT_HOLD && base_driving_ &&
-        nav2_active_)
+      if (ardusub_armed_ && ardusub_mode_ == ARDUSUB_MODE_ALT_HOLD && base_driving_ && nav2_active_)
       {
         current_mode_ = TargetMode::Goal::ORCA_MODE_AUV;
 
-        if (goal_handle_) {
+        if (goal_handle_)
+        {
           goal_handle_->succeed(std::make_shared<TargetMode::Result>());
           goal_handle_ = nullptr;
         }
@@ -218,19 +223,22 @@ class Manager : public rclcpp::Node
 
   void go_rov()
   {
-    if (ardusub_connected_ && have_pose_) {
+    if (ardusub_connected_ && have_pose_)
+    {
       // Don't arm or disarm, leave this to the pilot
 
       // Don't change ArduSub modes, leave this to the pilot
 
-      if (base_driving_) {
+      if (base_driving_)
+      {
         call_base(false);
         base_driving_ = false;
       }
 
 #ifdef ALLOW_NAV2_SHUTDOWN
       // TODO(clyde): this was flaky in Galactic, try in Humble
-      if (nav2_active_) {
+      if (nav2_active_)
+      {
         call_nav2(nav2_msgs::srv::ManageLifecycleNodes::Request::SHUTDOWN);
         nav2_active_ = false;
       }
@@ -239,7 +247,8 @@ class Manager : public rclcpp::Node
       // We are in ROV mode if we have a connection to ArduSub, the rest is optional
       current_mode_ = TargetMode::Goal::ORCA_MODE_ROV;
 
-      if (goal_handle_) {
+      if (goal_handle_)
+      {
         goal_handle_->succeed(std::make_shared<TargetMode::Result>());
         goal_handle_ = nullptr;
       }
@@ -250,23 +259,28 @@ class Manager : public rclcpp::Node
 
   void go_disarmed()
   {
-    if (ardusub_connected_ /* don't care about have_pose */) {
-      if (ardusub_armed_) {
+    if (ardusub_connected_ /* don't care about have_pose */)
+    {
+      if (ardusub_armed_)
+      {
         set_arm(false);
       }
 
-      if (ardusub_mode_ != ARDUSUB_MODE_MANUAL) {
+      if (ardusub_mode_ != ARDUSUB_MODE_MANUAL)
+      {
         set_ardusub_mode(0, ARDUSUB_MODE_MANUAL);
       }
 
-      if (base_driving_) {
+      if (base_driving_)
+      {
         call_base(false);
         base_driving_ = false;
       }
 
 #ifdef ALLOW_NAV2_SHUTDOWN
       // TODO(clyde): this was flaky in Galactic, try in Humble
-      if (nav2_active_) {
+      if (nav2_active_)
+      {
         call_nav2(nav2_msgs::srv::ManageLifecycleNodes::Request::SHUTDOWN);
         nav2_active_ = false;
       }
@@ -274,10 +288,12 @@ class Manager : public rclcpp::Node
 
       // We are DISARMED if we have a connection to ArduSub and the sub is actually disarmed
       // The mode_timer will keep trying until this happens
-      if (!ardusub_armed_) {
+      if (!ardusub_armed_)
+      {
         current_mode_ = TargetMode::Goal::ORCA_MODE_DISARMED;
 
-        if (goal_handle_) {
+        if (goal_handle_)
+        {
           goal_handle_->succeed(std::make_shared<TargetMode::Result>());
           goal_handle_ = nullptr;
         }
@@ -289,8 +305,10 @@ class Manager : public rclcpp::Node
 
   void go_to_target_mode()
   {
-    if (current_mode_ != target_mode_) {
-      switch (target_mode_) {
+    if (current_mode_ != target_mode_)
+    {
+      switch (target_mode_)
+      {
         case orca_msgs::action::TargetMode::Goal::ORCA_MODE_AUV:
           go_auv();
           break;
@@ -305,27 +323,27 @@ class Manager : public rclcpp::Node
     }
   }
 
-  rclcpp_action::GoalResponse handle_goal(
-    const rclcpp_action::GoalUUID & uuid,
-    std::shared_ptr<const TargetMode::Goal> goal) const  // NOLINT
+  rclcpp_action::GoalResponse handle_goal(const rclcpp_action::GoalUUID& uuid,
+                                          std::shared_ptr<const TargetMode::Goal> goal) const  // NOLINT
   {
-    (void) uuid;
+    (void)uuid;
 
     // Are we busy?
-    if (goal_handle_ || current_mode_ != target_mode_) {
+    if (goal_handle_ || current_mode_ != target_mode_)
+    {
       return rclcpp_action::GoalResponse::REJECT;
     }
 
     // Is there work to do?
-    if (goal->target_mode == current_mode_) {
+    if (goal->target_mode == current_mode_)
+    {
       return rclcpp_action::GoalResponse::REJECT;
     }
 
     return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
   }
 
-  rclcpp_action::CancelResponse handle_cancel(
-    const std::shared_ptr<GoalHandleTargetMode> goal_handle)  // NOLINT
+  rclcpp_action::CancelResponse handle_cancel(const std::shared_ptr<GoalHandleTargetMode> goal_handle)  // NOLINT
   {
     assert(goal_handle_ == goal_handle);
 
@@ -346,39 +364,34 @@ class Manager : public rclcpp::Node
   void post_construction_cb()
   {
     // shared_from_this() isn't possible until after the object is fully constructed
-    mavros_arm_client_ = std::make_shared<nav2_util::ServiceClient<mavros_msgs::srv::CommandBool>>(
-      MAVROS_ARM_SRV, shared_from_this());
-    mavros_set_mode_client_ = std::make_shared<nav2_util::ServiceClient<mavros_msgs::srv::SetMode>>(
-      MAVROS_SET_MODE_SRV, shared_from_this());
-    mavros_set_msg_interval_client_ =
-      std::make_shared<nav2_util::ServiceClient<mavros_msgs::srv::MessageInterval>>(
-      MAVROS_SET_MSG_INTERVAL_SRV, shared_from_this());
-    nav2_mgr_client_ =
-      std::make_shared<nav2_util::ServiceClient<nav2_msgs::srv::ManageLifecycleNodes>>(
-      NAV2_MGR_SRV, shared_from_this());
-    base_client_ = std::make_shared<nav2_util::ServiceClient<std_srvs::srv::SetBool>>(
-      BASE_SRV, shared_from_this());
+    mavros_arm_client_ =
+        std::make_shared<nav2_util::ServiceClient<mavros_msgs::srv::CommandBool>>(MAVROS_ARM_SRV, shared_from_this());
+    mavros_set_mode_client_ =
+        std::make_shared<nav2_util::ServiceClient<mavros_msgs::srv::SetMode>>(MAVROS_SET_MODE_SRV, shared_from_this());
+    mavros_set_msg_interval_client_ = std::make_shared<nav2_util::ServiceClient<mavros_msgs::srv::MessageInterval>>(
+        MAVROS_SET_MSG_INTERVAL_SRV, shared_from_this());
+    nav2_mgr_client_ = std::make_shared<nav2_util::ServiceClient<nav2_msgs::srv::ManageLifecycleNodes>>(
+        NAV2_MGR_SRV, shared_from_this());
+    base_client_ = std::make_shared<nav2_util::ServiceClient<std_srvs::srv::SetBool>>(BASE_SRV, shared_from_this());
 
     RCLCPP_INFO(get_logger(), "manager ready");
   }
 
 public:
-  Manager()
-  : Node{"manager"}
+  Manager() : Node{ "manager" }
   {
     // Suppress IDE warnings
-    (void) ekf_pose_sub_;
-    (void) set_target_mode_srv_;
-    (void) mode_timer_;
-    (void) mav_msg_rate_timer_;
-    (void) state_sub_;
+    (void)ekf_pose_sub_;
+    (void)set_target_mode_srv_;
+    (void)mode_timer_;
+    (void)mav_msg_rate_timer_;
+    (void)state_sub_;
 
     // Key MAV messages:
     // Purpose         MAV id                                    AP id
     // local_position  MAVLINK_MSG_ID_ATTITUDE_QUATERNION (31)   MSG_ATTITUDE_QUATERNION (2)
     // local_position  MAVLINK_MSG_ID_LOCAL_POSITION_NED (32)    MSG_LOCAL_POSITION (48)
-    mav_msg_ids_ =
-      declare_parameter<std::vector<int64_t>>("msg_ids", std::vector<int64_t>({31, 32}));
+    mav_msg_ids_ = declare_parameter<std::vector<int64_t>>("msg_ids", std::vector<int64_t>({ 31, 32 }));
 
     // Common message rate across all MAV messages:
     mav_msg_rate_ = declare_parameter("msg_rate", 20);
@@ -390,73 +403,68 @@ public:
     reliable.reliable();
 
     state_sub_ = create_subscription<mavros_msgs::msg::State>(
-      "/mavros/state", reliable,
-      [this](mavros_msgs::msg::State::ConstSharedPtr msg) // NOLINT
-      {
-        if (ardusub_connected_ != msg->connected) {
-          ardusub_connected_ = msg->connected;
-          if (ardusub_connected_) {
-            RCLCPP_INFO(get_logger(), "ArduSub connected");
+        "/mavros/state", reliable,
+        [this](mavros_msgs::msg::State::ConstSharedPtr msg)  // NOLINT
+        {
+          if (ardusub_connected_ != msg->connected)
+          {
+            ardusub_connected_ = msg->connected;
+            if (ardusub_connected_)
+            {
+              RCLCPP_INFO(get_logger(), "ArduSub connected");
 
-            // Change modes
-            mode_timer_ = create_wall_timer(
-              1s,
-              [this]() {
-                go_to_target_mode();
-              });
+              // Change modes
+              mode_timer_ = create_wall_timer(1s, [this]() { go_to_target_mode(); });
 
-            // A 2nd GCS (e.g., QGC) might change message rates on launch, e.g.,:
-            // https://discuss.bluerobotics.com/t/qgroundcontrol-stream-rates/12204
-            // Set up a timer to periodically set message rates
-            mav_msg_rate_timer_ = create_wall_timer(
-              10s,
-              [this]() {
-                set_message_rates();
-              });
+              // A 2nd GCS (e.g., QGC) might change message rates on launch, e.g.,:
+              // https://discuss.bluerobotics.com/t/qgroundcontrol-stream-rates/12204
+              // Set up a timer to periodically set message rates
+              mav_msg_rate_timer_ = create_wall_timer(10s, [this]() { set_message_rates(); });
 
-            using namespace std::placeholders;
-            set_target_mode_srv_ = rclcpp_action::create_server<TargetMode>(
-              this,
-              "set_target_mode",
-              std::bind(&Manager::handle_goal, this, _1, _2),  // NOLINT
-              std::bind(&Manager::handle_cancel, this, _1),  // NOLINT
-              std::bind(&Manager::handle_accepted, this, _1));  // NOLINT
-          } else {
-            RCLCPP_INFO(get_logger(), "ArduSub disconnected");
-            mode_timer_ = nullptr;
-            mav_msg_rate_timer_ = nullptr;
-            set_target_mode_srv_ = nullptr;
+              using namespace std::placeholders;
+              set_target_mode_srv_ = rclcpp_action::create_server<TargetMode>(
+                  this, "set_target_mode", std::bind(&Manager::handle_goal, this, _1, _2),  // NOLINT
+                  std::bind(&Manager::handle_cancel, this, _1),                             // NOLINT
+                  std::bind(&Manager::handle_accepted, this, _1));                          // NOLINT
+            }
+            else
+            {
+              RCLCPP_INFO(get_logger(), "ArduSub disconnected");
+              mode_timer_ = nullptr;
+              mav_msg_rate_timer_ = nullptr;
+              set_target_mode_srv_ = nullptr;
+            }
           }
-        }
 
-        if (ardusub_armed_ != msg->armed) {
-          ardusub_armed_ = msg->armed;
-          RCLCPP_INFO(get_logger(), msg->armed ? "armed" : "disarmed");
-        }
+          if (ardusub_armed_ != msg->armed)
+          {
+            ardusub_armed_ = msg->armed;
+            RCLCPP_INFO(get_logger(), msg->armed ? "armed" : "disarmed");
+          }
 
-        if (ardusub_mode_ != msg->mode) {
-          ardusub_mode_ = msg->mode;
-          RCLCPP_INFO(get_logger(), "ArduSub mode is %s", msg->mode.c_str());
-        }
-      });
+          if (ardusub_mode_ != msg->mode)
+          {
+            ardusub_mode_ = msg->mode;
+            RCLCPP_INFO(get_logger(), "ArduSub mode is %s", msg->mode.c_str());
+          }
+        });
 
     ekf_pose_sub_ = create_subscription<geometry_msgs::msg::PoseStamped>(
-      "/mavros/local_position/pose", best_effort,
-      [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr) // NOLINT
-      {
-        if (!have_pose_) {
-          have_pose_ = true;
-          RCLCPP_INFO(get_logger(), "EKF is running");
-        }
-      });
+        "/mavros/local_position/pose", best_effort,
+        [this](geometry_msgs::msg::PoseStamped::ConstSharedPtr)  // NOLINT
+        {
+          if (!have_pose_)
+          {
+            have_pose_ = true;
+            RCLCPP_INFO(get_logger(), "EKF is running");
+          }
+        });
 
     // Postpone some construction
-    init_timer_ = create_wall_timer(
-      0s,
-      [this]() {
-        init_timer_->cancel();  // One-shot
-        post_construction_cb();
-      });
+    init_timer_ = create_wall_timer(0s, [this]() {
+      init_timer_->cancel();  // One-shot
+      post_construction_cb();
+    });
   }
 };
 
@@ -466,7 +474,7 @@ public:
 // Main
 //=============================================================================
 
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
   setvbuf(stdout, nullptr, _IONBF, BUFSIZ);
   rclcpp::init(argc, argv);

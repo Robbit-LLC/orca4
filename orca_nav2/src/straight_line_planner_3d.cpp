@@ -41,7 +41,7 @@ namespace orca_nav2
 class StraightLinePlanner3D : public nav2_core::GlobalPlanner
 {
   rclcpp::Clock::SharedPtr clock_;
-  rclcpp::Logger logger_{rclcpp::get_logger("placeholder_will_be_set_in_configure")};
+  rclcpp::Logger logger_{ rclcpp::get_logger("placeholder_will_be_set_in_configure") };
   std::string global_frame_id_;
 
   // Parameters
@@ -52,11 +52,8 @@ public:
   StraightLinePlanner3D() = default;
   ~StraightLinePlanner3D() override = default;
 
-  void configure(
-    const rclcpp_lifecycle::LifecycleNode::WeakPtr & weak_parent,
-    std::string name,
-    std::shared_ptr<tf2_ros::Buffer>,
-    std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros) override
+  void configure(const rclcpp_lifecycle::LifecycleNode::WeakPtr& weak_parent, std::string name,
+                 std::shared_ptr<tf2_ros::Buffer>, std::shared_ptr<nav2_costmap_2d::Costmap2DROS> costmap_ros) override
   {
     auto parent = weak_parent.lock();
 
@@ -67,7 +64,8 @@ public:
     PARAMETER(parent, name, planning_dist, 0.1)
     PARAMETER(parent, name, z_before_xy, false)
 
-    if (planning_dist_ < 0.01) {
+    if (planning_dist_ < 0.01)
+    {
       RCLCPP_WARN(logger_, "planning_dist too low, setting to default 0.1");
       planning_dist_ = 0.1;
     }
@@ -75,23 +73,26 @@ public:
     RCLCPP_INFO(logger_, "StraightLinePlanner3D configured");
   }
 
-  void cleanup() override {}
+  void cleanup() override
+  {
+  }
 
-  void activate() override {}
+  void activate() override
+  {
+  }
 
-  void deactivate() override {}
+  void deactivate() override
+  {
+  }
 
   // Move in one 3D segment
-  void createOneSegmentPlan(
-    const geometry_msgs::msg::PoseStamped & start,
-    const geometry_msgs::msg::PoseStamped & goal,
-    nav_msgs::msg::Path & global_path)
+  void createOneSegmentPlan(const geometry_msgs::msg::PoseStamped& start, const geometry_msgs::msg::PoseStamped& goal,
+                            nav_msgs::msg::Path& global_path)
   {
-    int num_poses = static_cast<int>(std::hypot(
-        goal.pose.position.x - start.pose.position.x,
-        goal.pose.position.y - start.pose.position.y,
-        goal.pose.position.z - start.pose.position.z) /
-      planning_dist_);
+    int num_poses = static_cast<int>(std::hypot(goal.pose.position.x - start.pose.position.x,
+                                                goal.pose.position.y - start.pose.position.y,
+                                                goal.pose.position.z - start.pose.position.z) /
+                                     planning_dist_);
 
     double x_increment = (goal.pose.position.x - start.pose.position.x) / num_poses;
     double y_increment = (goal.pose.position.y - start.pose.position.y) / num_poses;
@@ -107,7 +108,8 @@ public:
     pose.pose.orientation.z = 0.0;
     pose.pose.orientation.w = 1.0;
 
-    for (int i = 0; i < num_poses; ++i) {
+    for (int i = 0; i < num_poses; ++i)
+    {
       pose.pose.position.x = start.pose.position.x + x_increment * i;
       pose.pose.position.y = start.pose.position.y + y_increment * i;
       pose.pose.position.z = start.pose.position.z + z_increment * i;
@@ -116,18 +118,14 @@ public:
   }
 
   // Move vertically, then horizontally
-  void createTwoSegmentPlan(
-    const geometry_msgs::msg::PoseStamped & start,
-    const geometry_msgs::msg::PoseStamped & goal,
-    nav_msgs::msg::Path & global_path)
+  void createTwoSegmentPlan(const geometry_msgs::msg::PoseStamped& start, const geometry_msgs::msg::PoseStamped& goal,
+                            nav_msgs::msg::Path& global_path)
   {
-    int num_z_poses = static_cast<int>(std::abs(goal.pose.position.z - start.pose.position.z) /
-      planning_dist_);
+    int num_z_poses = static_cast<int>(std::abs(goal.pose.position.z - start.pose.position.z) / planning_dist_);
 
-    int num_xy_poses = static_cast<int>(std::hypot(
-        goal.pose.position.x - start.pose.position.x,
-        goal.pose.position.y - start.pose.position.y) /
-      planning_dist_);
+    int num_xy_poses = static_cast<int>(
+        std::hypot(goal.pose.position.x - start.pose.position.x, goal.pose.position.y - start.pose.position.y) /
+        planning_dist_);
 
     double x_increment = (goal.pose.position.x - start.pose.position.x) / num_xy_poses;
     double y_increment = (goal.pose.position.y - start.pose.position.y) / num_xy_poses;
@@ -144,7 +142,8 @@ public:
     pose.pose.orientation.w = 1.0;
 
     // Move vertically
-    for (int i = 0; i < num_z_poses; ++i) {
+    for (int i = 0; i < num_z_poses; ++i)
+    {
       pose.pose.position.z = start.pose.position.z + z_increment * i;
       global_path.poses.push_back(pose);
     }
@@ -154,25 +153,27 @@ public:
     global_path.poses.push_back(pose);
 
     // Move horizontally
-    for (int i = 0; i < num_xy_poses; ++i) {
+    for (int i = 0; i < num_xy_poses; ++i)
+    {
       pose.pose.position.x = start.pose.position.x + x_increment * i;
       pose.pose.position.y = start.pose.position.y + y_increment * i;
       global_path.poses.push_back(pose);
     }
   }
 
-  nav_msgs::msg::Path createPlan(
-    const geometry_msgs::msg::PoseStamped & start,
-    const geometry_msgs::msg::PoseStamped & goal) override
+  nav_msgs::msg::Path createPlan(const geometry_msgs::msg::PoseStamped& start,
+                                 const geometry_msgs::msg::PoseStamped& goal) override
   {
     nav_msgs::msg::Path global_path;
 
-    if (start.header.frame_id != global_frame_id_) {
+    if (start.header.frame_id != global_frame_id_)
+    {
       RCLCPP_ERROR(logger_, "Start pose must be in the %s frame", global_frame_id_.c_str());
       return global_path;
     }
 
-    if (goal.header.frame_id != global_frame_id_) {
+    if (goal.header.frame_id != global_frame_id_)
+    {
       RCLCPP_ERROR(logger_, "Goal pose must be in the %s frame", global_frame_id_.c_str());
       return global_path;
     }
@@ -180,9 +181,12 @@ public:
     global_path.header.stamp = clock_->now();
     global_path.header.frame_id = global_frame_id_;
 
-    if (z_before_xy_) {
+    if (z_before_xy_)
+    {
       createTwoSegmentPlan(start, goal, global_path);
-    } else {
+    }
+    else
+    {
       createOneSegmentPlan(start, goal, global_path);
     }
 

@@ -14,5 +14,6 @@ file and replaces strings of the form `@foo` with calculated values to generate
 The script must be run manually when the model is changed.
 
 An URDF file is not provided. In practice this means 2 things:
+
 1. static transforms are published by instances `tf2_ros/static_transform_publisher`
 2. Rviz2 will only show transforms (Rviz2 can't read SDF)

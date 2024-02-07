@@ -22,18 +22,18 @@
 
 #include <memory>
 
-#include "nav_msgs/msg/odometry.hpp" // IWYU pragma: keep
-#include "nav_msgs/msg/path.hpp" // IWYU pragma: keep
-#include "rclcpp/rclcpp.hpp" // IWYU pragma: keep
+#include "nav_msgs/msg/odometry.hpp"  // IWYU pragma: keep
+#include "nav_msgs/msg/path.hpp"      // IWYU pragma: keep
+#include "rclcpp/rclcpp.hpp"          // IWYU pragma: keep
 #include "ros2_shared/context_macros.hpp"
 
 namespace orca_vision
 {
 
-#define PARAMS \
-  CXT_MACRO_MEMBER(subscribe_best_effort, bool, true) \
-  CXT_MACRO_MEMBER(max_poses, int, 500) \
-/* End of list */
+#define PARAMS                                                                                                         \
+  CXT_MACRO_MEMBER(subscribe_best_effort, bool, true)                                                                  \
+  CXT_MACRO_MEMBER(max_poses, int, 500)                                                                                \
+  /* End of list */
 
 struct Parameters
 {
@@ -63,8 +63,7 @@ class OdomToPathNode : public rclcpp::Node
 
     // Log parameters
 #undef CXT_MACRO_MEMBER
-#define CXT_MACRO_MEMBER(n, t, d) CXT_MACRO_LOG_PARAMETER( \
-    RCLCPP_INFO, get_logger(), params_, n, t, d)
+#define CXT_MACRO_MEMBER(n, t, d) CXT_MACRO_LOG_PARAMETER(RCLCPP_INFO, get_logger(), params_, n, t, d)
     PARAMS
 
     // Check that all command line parameters are defined
@@ -78,43 +77,46 @@ class OdomToPathNode : public rclcpp::Node
   }
 
 public:
-  OdomToPathNode()
-  : Node{"odom_to_path"}
+  OdomToPathNode() : Node{ "odom_to_path" }
   {
-    (void) odom_sub_;
+    (void)odom_sub_;
 
     init_parameters();
 
     // Gazebo p3d plugin uses best-effort QoS
     rclcpp::QoS qos(10);
-    if (params_.subscribe_best_effort_) {
+    if (params_.subscribe_best_effort_)
+    {
       qos.best_effort();
-    } else {
+    }
+    else
+    {
       qos.reliable();
     }
 
     path_pub_ = create_publisher<nav_msgs::msg::Path>("path", 10);
-    odom_sub_ = create_subscription<nav_msgs::msg::Odometry>(
-      "odom", qos, [this](const nav_msgs::msg::Odometry::ConstSharedPtr msg)
-      {
-        if (path_pub_->get_subscription_count() > 0) {
-          path_.header = msg->header;
-          if (path_.poses.size() > (uint64_t)params_.max_poses_) {
-            path_.poses.clear();
-          }
-          geometry_msgs::msg::PoseStamped pose_stamped;
-          pose_stamped.header = msg->header;
-          pose_stamped.pose = msg->pose.pose;
-          path_.poses.push_back(pose_stamped);
-          path_pub_->publish(path_);
-        }
-      });
+    odom_sub_ = create_subscription<nav_msgs::msg::Odometry>("odom", qos,
+                                                             [this](const nav_msgs::msg::Odometry::ConstSharedPtr msg) {
+                                                               if (path_pub_->get_subscription_count() > 0)
+                                                               {
+                                                                 path_.header = msg->header;
+                                                                 if (path_.poses.size() > (uint64_t)params_.max_poses_)
+                                                                 {
+                                                                   path_.poses.clear();
+                                                                 }
+                                                                 geometry_msgs::msg::PoseStamped pose_stamped;
+                                                                 pose_stamped.header = msg->header;
+                                                                 pose_stamped.pose = msg->pose.pose;
+                                                                 path_.poses.push_back(pose_stamped);
+                                                                 path_pub_->publish(path_);
+                                                               }
+                                                             });
   }
 };
 
 }  // namespace orca_vision
 
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   auto node = std::make_shared<orca_vision::OdomToPathNode>();

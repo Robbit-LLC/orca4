@@ -21,12 +21,14 @@ Nav2 navigation launch file, modified to avoid launch the velocity smoother.
 ### Full automation
 
 In a terminal run:
+
 ~~~
 source src/orca4/setup.bash
 ros2 launch orca_bringup sim_launch.py
 ~~~
 
 Execute a mission in a 2nd terminal:
+
 ~~~
 source src/orca4/setup.bash
 ros2 run orca_bringup mission_runner.py
@@ -37,16 +39,19 @@ ros2 run orca_bringup mission_runner.py
 It is possible to launch Gazebo and ArduSub and control the sub using MAVProxy.
 
 Launch a minimal system:
+
 ~~~
 ros2 launch orca_bringup sim_launch.py base:=false mavros:=false nav:=false rviz:=false slam:=false
 ~~~
 
 Launch MAVProxy in a 2nd terminal:
+
 ~~~
 mavproxy.py --master tcp:127.0.0.1:5760 --sitl 127.0.0.1:5501 --out 127.0.0.1:14550 --out 127.0.0.1:14551 --out udp:0.0.0.0:14550 --console
 ~~~
 
 You can use MAVProxy to send commands directly to ArduSub:
+
 ~~~
 arm throttle
 rc 3 1450
@@ -56,6 +61,7 @@ disarm
 ~~~
 
 RC channels:
+
 * RC 3 -- vertical
 * RC 4 -- yaw
 * RC 5 -- forward
@@ -64,6 +70,7 @@ RC channels:
 ### MAVProxy + SLAM
 
 This will bring up a minimal system with SLAM and RViz:
+
 ~~~
 ros2 launch orca_bringup sim_launch.py base:=false mavros:=false nav:=false
 ~~~

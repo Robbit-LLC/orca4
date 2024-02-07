@@ -25,15 +25,15 @@
 
 #include <string>
 
-#include "geometry_msgs/msg/accel_stamped.hpp" // IWYU pragma: keep
-#include "geometry_msgs/msg/pose_stamped.hpp" // IWYU pragma: keep
-#include "geometry_msgs/msg/transform_stamped.hpp" // IWYU pragma: keep
-#include "geometry_msgs/msg/twist_stamped.hpp" // IWYU pragma: keep
-#include "geometry_msgs/msg/wrench_stamped.hpp" // IWYU pragma: keep
-#include "nav_msgs/msg/odometry.hpp" // IWYU pragma: keep
+#include "geometry_msgs/msg/accel_stamped.hpp"      // IWYU pragma: keep
+#include "geometry_msgs/msg/pose_stamped.hpp"       // IWYU pragma: keep
+#include "geometry_msgs/msg/transform_stamped.hpp"  // IWYU pragma: keep
+#include "geometry_msgs/msg/twist_stamped.hpp"      // IWYU pragma: keep
+#include "geometry_msgs/msg/wrench_stamped.hpp"     // IWYU pragma: keep
+#include "nav_msgs/msg/odometry.hpp"                // IWYU pragma: keep
 #include "orca_base/base_context.hpp"
-#include "orca_msgs/msg/motion.hpp" // IWYU pragma: keep
-#include "orca_shared/model.hpp" // IWYU pragma: keep
+#include "orca_msgs/msg/motion.hpp"  // IWYU pragma: keep
+#include "orca_shared/model.hpp"     // IWYU pragma: keep
 #include "rclcpp/logger.hpp"
 
 namespace orca_base
@@ -42,38 +42,43 @@ namespace orca_base
 class UnderwaterMotion
 {
   rclcpp::Logger logger_;
-  const BaseContext & cxt_;
+  const BaseContext& cxt_;
   orca_msgs::msg::Motion motion_;
 
-  double report_and_clamp(const std::string &func, const std::string &name, double v, double minmax) const;
+  double report_and_clamp(const std::string& func, const std::string& name, double v, double minmax) const;
 
-  [[nodiscard]] geometry_msgs::msg::Accel calc_accel(
-    const geometry_msgs::msg::Twist & v0,
-    const geometry_msgs::msg::Twist & v1) const;
+  [[nodiscard]] geometry_msgs::msg::Accel calc_accel(const geometry_msgs::msg::Twist& v0,
+                                                     const geometry_msgs::msg::Twist& v1) const;
 
-  [[nodiscard]] geometry_msgs::msg::Twist calc_vel(
-    const geometry_msgs::msg::Twist & v0,
-    const geometry_msgs::msg::Accel & a) const;
+  [[nodiscard]] geometry_msgs::msg::Twist calc_vel(const geometry_msgs::msg::Twist& v0,
+                                                   const geometry_msgs::msg::Accel& a) const;
 
-  [[nodiscard]] geometry_msgs::msg::Pose calc_pose(
-    const geometry_msgs::msg::Pose & p0,
-    const geometry_msgs::msg::Twist & v) const;
+  [[nodiscard]] geometry_msgs::msg::Pose calc_pose(const geometry_msgs::msg::Pose& p0,
+                                                   const geometry_msgs::msg::Twist& v) const;
 
 public:
-  UnderwaterMotion(
-    const rclcpp::Time & t, const rclcpp::Logger & logger, const BaseContext & cxt,
-    const geometry_msgs::msg::Pose & initial_pose);
+  UnderwaterMotion(const rclcpp::Time& t, const rclcpp::Logger& logger, const BaseContext& cxt,
+                   const geometry_msgs::msg::Pose& initial_pose);
 
-  [[nodiscard]] const orca_msgs::msg::Motion & motion() const {return motion_;}
+  [[nodiscard]] const orca_msgs::msg::Motion& motion() const
+  {
+    return motion_;
+  }
 
   [[nodiscard]] nav_msgs::msg::Odometry odometry() const;
 
-  [[nodiscard]] std::string frame_id() const {return motion_.header.frame_id;}
+  [[nodiscard]] std::string frame_id() const
+  {
+    return motion_.header.frame_id;
+  }
 
-  [[nodiscard]] builtin_interfaces::msg::Time stamp() const {return motion_.header.stamp;}
+  [[nodiscard]] builtin_interfaces::msg::Time stamp() const
+  {
+    return motion_.header.stamp;
+  }
 
   // Update state from time t-(1/timer_rate) to time t
-  void update(const rclcpp::Time & t, const geometry_msgs::msg::Twist & cmd_vel);
+  void update(const rclcpp::Time& t, const geometry_msgs::msg::Twist& cmd_vel);
 };
 
 }  // namespace orca_base

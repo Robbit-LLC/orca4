@@ -42,24 +42,24 @@ namespace orca
 // _yaw yaw
 // roll and pitch are always 0
 
-#define MODEL_PARAMS \
-  CXT_MACRO_MEMBER(mdl_mass, double, 9.75) \
-  CXT_MACRO_MEMBER(mdl_volume, double, 0.01) \
-  CXT_MACRO_MEMBER(mdl_fluid_density, double, 997) \
-  /* kg/m^3, 997 for freshwater, 1029 for seawater  */ \
-  CXT_MACRO_MEMBER(mdl_thrust_scale, double, 0.7) \
-  /* Scale max thruster forces to give a better linear approximation  */ \
-  CXT_MACRO_MEMBER(mdl_drag_coef_x, double, 0.8) \
-  /* Forward drag, 1.0 is a box  */ \
-  CXT_MACRO_MEMBER(mdl_drag_coef_y, double, 0.95) \
-  /* Strafe drag  */ \
-  CXT_MACRO_MEMBER(mdl_drag_coef_z, double, 0.95) \
-  /* Vertical drag  */ \
-  CXT_MACRO_MEMBER(mdl_drag_partial_const_yaw, double, 0.004) \
-  /* Yaw drag, wild guess  */ \
-  CXT_MACRO_MEMBER(mdl_thrust_dz_pwm, uint16_t, 35) \
-  /* Thruster deadzone  */ \
-/* End of list */
+#define MODEL_PARAMS                                                                                                   \
+  CXT_MACRO_MEMBER(mdl_mass, double, 9.75)                                                                             \
+  CXT_MACRO_MEMBER(mdl_volume, double, 0.01)                                                                           \
+  CXT_MACRO_MEMBER(mdl_fluid_density, double, 997)                                                                     \
+  /* kg/m^3, 997 for freshwater, 1029 for seawater  */                                                                 \
+  CXT_MACRO_MEMBER(mdl_thrust_scale, double, 0.7)                                                                      \
+  /* Scale max thruster forces to give a better linear approximation  */                                               \
+  CXT_MACRO_MEMBER(mdl_drag_coef_x, double, 0.8)                                                                       \
+  /* Forward drag, 1.0 is a box  */                                                                                    \
+  CXT_MACRO_MEMBER(mdl_drag_coef_y, double, 0.95)                                                                      \
+  /* Strafe drag  */                                                                                                   \
+  CXT_MACRO_MEMBER(mdl_drag_coef_z, double, 0.95)                                                                      \
+  /* Vertical drag  */                                                                                                 \
+  CXT_MACRO_MEMBER(mdl_drag_partial_const_yaw, double, 0.004)                                                          \
+  /* Yaw drag, wild guess  */                                                                                          \
+  CXT_MACRO_MEMBER(mdl_thrust_dz_pwm, uint16_t, 35)                                                                    \
+  /* Thruster deadzone  */                                                                                             \
+  /* End of list */
 
 #undef CXT_MACRO_MEMBER
 #define CXT_MACRO_MEMBER(n, t, d) CXT_MACRO_DEFINE_MEMBER(n, t, d)
@@ -76,17 +76,17 @@ struct Model
   // Sensor constants
   //=====================================================================================
 
-  static constexpr double BARO_STDDEV = 201.7;      // Measured during ft3
-  static constexpr double BARO_FREQ = 20.0;         // Slowed down for Orca
-  static constexpr double DEPTH_STDDEV = 0.02064;   // Measured during ft3
+  static constexpr double BARO_STDDEV = 201.7;     // Measured during ft3
+  static constexpr double BARO_FREQ = 20.0;        // Slowed down for Orca
+  static constexpr double DEPTH_STDDEV = 0.02064;  // Measured during ft3
 
   //=====================================================================================
   // Vehicle constants, in the body frame (x forward, y left, z up)
   //=====================================================================================
 
-  static constexpr double ROV_DIM_X = 0.457;       // Length
-  static constexpr double ROV_DIM_Y = 0.338;       // Width
-  static constexpr double ROV_DIM_Z = 0.254;       // Height
+  static constexpr double ROV_DIM_X = 0.457;  // Length
+  static constexpr double ROV_DIM_Y = 0.338;  // Width
+  static constexpr double ROV_DIM_Z = 0.254;  // Height
 
   static constexpr double TETHER_DIAM = 0.008;
 
@@ -120,11 +120,13 @@ struct Model
   //=====================================================================================
 
   // Assume a uniform distribution of mass in the vehicle box
-  double moment_of_inertia_yaw_ = mdl_mass_ / 12.0 *
-    (ROV_DIM_X * ROV_DIM_X + ROV_DIM_Y * ROV_DIM_Y);
+  double moment_of_inertia_yaw_ = mdl_mass_ / 12.0 * (ROV_DIM_X * ROV_DIM_X + ROV_DIM_Y * ROV_DIM_Y);
 
   // Force / torque => acceleration
-  [[nodiscard]] double force_to_accel(double force) const {return force / mdl_mass_;}
+  [[nodiscard]] double force_to_accel(double force) const
+  {
+    return force / mdl_mass_;
+  }
 
   [[nodiscard]] double torque_to_accel_yaw(double torque_yaw) const
   {
@@ -132,7 +134,10 @@ struct Model
   }
 
   // Acceleration => force / torque
-  [[nodiscard]] double accel_to_force(double accel) const {return mdl_mass_ * accel;}
+  [[nodiscard]] double accel_to_force(double accel) const
+  {
+    return mdl_mass_ * accel;
+  }
 
   [[nodiscard]] double accel_to_torque_yaw(double accel_yaw) const
   {
@@ -144,16 +149,25 @@ struct Model
   // Effort is force / max_force, and ranges from -1.0 to 1.0
   //=====================================================================================
 
-  [[nodiscard]] double bollard_force_xy() const {return BOLLARD_FORCE_XY * mdl_thrust_scale_;}
+  [[nodiscard]] double bollard_force_xy() const
+  {
+    return BOLLARD_FORCE_XY * mdl_thrust_scale_;
+  }
 
-  [[nodiscard]] double bollard_force_z_up() const {return BOLLARD_FORCE_Z_UP * mdl_thrust_scale_;}
+  [[nodiscard]] double bollard_force_z_up() const
+  {
+    return BOLLARD_FORCE_Z_UP * mdl_thrust_scale_;
+  }
 
   [[nodiscard]] double bollard_force_z_down() const
   {
     return BOLLARD_FORCE_Z_DOWN * mdl_thrust_scale_;
   }
 
-  [[nodiscard]] double max_torque_yaw() const {return MAX_TORQUE_YAW * mdl_thrust_scale_;}
+  [[nodiscard]] double max_torque_yaw() const
+  {
+    return MAX_TORQUE_YAW * mdl_thrust_scale_;
+  }
 
   [[nodiscard]] double force_to_effort_xy(double force_xy) const
   {
@@ -239,15 +253,27 @@ struct Model
   }
 
   // Mass displaced by the volume, in kg
-  [[nodiscard]] double displaced_mass() const {return mdl_volume_ * mdl_fluid_density_;}
+  [[nodiscard]] double displaced_mass() const
+  {
+    return mdl_volume_ * mdl_fluid_density_;
+  }
 
   // Weight in water, in Newtons (kg * m/s^2)
-  [[nodiscard]] double weight_in_water() const {return GRAVITY * (mdl_mass_ - displaced_mass());}
+  [[nodiscard]] double weight_in_water() const
+  {
+    return GRAVITY * (mdl_mass_ - displaced_mass());
+  }
 
   // Z acceleration required to hover, in m/s^2
-  [[nodiscard]] double hover_accel_z() const {return weight_in_water() / mdl_mass_;}
+  [[nodiscard]] double hover_accel_z() const
+  {
+    return weight_in_water() / mdl_mass_;
+  }
 
-  [[nodiscard]] double hover_force_z() const {return accel_to_force(hover_accel_z());}
+  [[nodiscard]] double hover_force_z() const
+  {
+    return accel_to_force(hover_accel_z());
+  }
 
   //=====================================================================================
   // Drag in the body frame (x forward, y left, z up)
@@ -338,29 +364,26 @@ struct Model
   // Combine all 4 DoF
   //=====================================================================================
 
-  [[nodiscard]] geometry_msgs::msg::Accel drag_accel(const geometry_msgs::msg::Twist & vel) const;
+  [[nodiscard]] geometry_msgs::msg::Accel drag_accel(const geometry_msgs::msg::Twist& vel) const;
 
-  [[nodiscard]] geometry_msgs::msg::Wrench accel_to_wrench(const geometry_msgs::msg::Accel & accel)
-  const;
+  [[nodiscard]] geometry_msgs::msg::Wrench accel_to_wrench(const geometry_msgs::msg::Accel& accel) const;
 
-  [[nodiscard]] geometry_msgs::msg::Wrench drag_wrench(const geometry_msgs::msg::Twist & vel) const
+  [[nodiscard]] geometry_msgs::msg::Wrench drag_wrench(const geometry_msgs::msg::Twist& vel) const
   {
     return accel_to_wrench(drag_accel(vel));
   }
 
   // Wrench scaled by bollard force, clamped to [-1, 1]
-  [[nodiscard]] orca_msgs::msg::Effort wrench_to_effort(const geometry_msgs::msg::Wrench & wrench)
-  const;
+  [[nodiscard]] orca_msgs::msg::Effort wrench_to_effort(const geometry_msgs::msg::Wrench& wrench) const;
 
-  [[nodiscard]] orca_msgs::msg::Effort accel_to_effort(const geometry_msgs::msg::Accel & accel)
-  const;
+  [[nodiscard]] orca_msgs::msg::Effort accel_to_effort(const geometry_msgs::msg::Accel& accel) const;
 
   //=====================================================================================
   // Logging
   //=====================================================================================
 
   // Log some info... handy for debugging
-  void log_info(const rclcpp::Logger & logger) const;
+  void log_info(const rclcpp::Logger& logger) const;
 };
 
 }  // namespace orca
