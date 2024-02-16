@@ -49,7 +49,9 @@ class SendGoalResult(Enum):
 
 
 def make_pose(x: float, y: float, z: float):
-    return PoseStamped(header=Header(frame_id='map'), pose=Pose(position=Point(x=x, y=y, z=z)))
+    return PoseStamped(
+        header=Header(frame_id="map"), pose=Pose(position=Point(x=x, y=y, z=z))
+    )
 
 
 # Go to AUV mode
@@ -70,12 +72,12 @@ dive.poses.append(make_pose(x=0.0, y=0.0, z=-8.0))
 
 # Big loop, will eventually result in a loop closure
 delay_loop = FollowWaypoints.Goal()
-delay_loop.poses.append(make_pose(x=0.0, y=0.0, z=-7.0))
-for _ in range(2):
-    delay_loop.poses.append(make_pose(x=20.0, y=-13.0, z=-7.0))
-    delay_loop.poses.append(make_pose(x=10.0, y=-23.0, z=-7.0))
-    delay_loop.poses.append(make_pose(x=-10.0, y=-8.0, z=-7.0))
-    delay_loop.poses.append(make_pose(x=0.0, y=0.0, z=-7.0))
+delay_loop.poses.append(make_pose(x=20.0, y=0.0, z=0.0))
+# for _ in range(2):
+#     delay_loop.poses.append(make_pose(x=20.0, y=-13.0, z=-7.0))
+#     delay_loop.poses.append(make_pose(x=10.0, y=-23.0, z=-7.0))
+#     delay_loop.poses.append(make_pose(x=-10.0, y=-8.0, z=-7.0))
+#     delay_loop.poses.append(make_pose(x=0.0, y=0.0, z=-7.0))
 
 
 # Send a goal to an action server and wait for the result.
@@ -86,52 +88,61 @@ def send_goal(node, action_client, send_goal_msg) -> SendGoalResult:
     try:
         action_client.wait_for_server()
 
-        print('Sending goal...')
+        print("Sending goal...")
         goal_future = action_client.send_goal_async(send_goal_msg)
         rclpy.spin_until_future_complete(node, goal_future)
         goal_handle = goal_future.result()
 
         if goal_handle is None:
-            raise RuntimeError('Exception while sending goal: {!r}'.format(goal_future.exception()))
+            raise RuntimeError(
+                "Exception while sending goal: {!r}".format(goal_future.exception())
+            )
 
         if not goal_handle.accepted:
-            print('Goal rejected')
+            print("Goal rejected")
             return SendGoalResult.FAILURE
 
-        print('Goal accepted with ID: {}'.format(bytes(goal_handle.goal_id.uuid).hex()))
+        print("Goal accepted with ID: {}".format(bytes(goal_handle.goal_id.uuid).hex()))
         result_future = goal_handle.get_result_async()
         rclpy.spin_until_future_complete(node, result_future)
 
         result = result_future.result()
 
         if result is None:
-            raise RuntimeError('Exception while getting result: {!r}'.format(result_future.exception()))
+            raise RuntimeError(
+                "Exception while getting result: {!r}".format(result_future.exception())
+            )
 
-        print('Goal completed')
+        print("Goal completed")
         return SendGoalResult.SUCCESS
 
     except KeyboardInterrupt:
         # Cancel the goal if it's still active
         # TODO(clyde): this seems to work, but a second exception is generated -- why?
-        if (goal_handle is not None and
-                (GoalStatus.STATUS_ACCEPTED == goal_handle.status or
-                 GoalStatus.STATUS_EXECUTING == goal_handle.status)):
-            print('Canceling goal...')
+        if goal_handle is not None and (
+            GoalStatus.STATUS_ACCEPTED == goal_handle.status
+            or GoalStatus.STATUS_EXECUTING == goal_handle.status
+        ):
+            print("Canceling goal...")
             cancel_future = goal_handle.cancel_goal_async()
             rclpy.spin_until_future_complete(node, cancel_future)
             cancel_response = cancel_future.result()
 
             if cancel_response is None:
-                raise RuntimeError('Exception while canceling goal: {!r}'.format(cancel_future.exception()))
+                raise RuntimeError(
+                    "Exception while canceling goal: {!r}".format(
+                        cancel_future.exception()
+                    )
+                )
 
             if len(cancel_response.goals_canceling) == 0:
-                raise RuntimeError('Failed to cancel goal')
+                raise RuntimeError("Failed to cancel goal")
             if len(cancel_response.goals_canceling) > 1:
-                raise RuntimeError('More than one goal canceled')
+                raise RuntimeError("More than one goal canceled")
             if cancel_response.goals_canceling[0].goal_id != goal_handle.goal_id:
-                raise RuntimeError('Canceled goal with incorrect goal ID')
+                raise RuntimeError("Canceled goal with incorrect goal ID")
 
-            print('Goal canceled')
+            print("Goal canceled")
             return SendGoalResult.CANCELED
 
 
@@ -145,20 +156,20 @@ def main():
     try:
         node = rclpy.create_node("mission_runner")
 
-        set_target_mode = ActionClient(node, TargetMode, '/set_target_mode')
-        follow_waypoints = ActionClient(node, FollowWaypoints, '/follow_waypoints')
+        set_target_mode = ActionClient(node, TargetMode, "/set_target_mode")
+        follow_waypoints = ActionClient(node, FollowWaypoints, "/follow_waypoints")
 
-        print('>>> Setting mode to AUV <<<')
+        print(">>> Setting mode to AUV <<<")
         if send_goal(node, set_target_mode, go_auv) == SendGoalResult.SUCCESS:
-            print('>>> Executing mission <<<')
+            print(">>> Executing mission <<<")
             send_goal(node, follow_waypoints, delay_loop)
 
-            print('>>> Setting mode to ROV <<<')
+            print(">>> Setting mode to ROV <<<")
             send_goal(node, set_target_mode, go_rov)
 
-            print('>>> Mission complete <<<')
+            print(">>> Mission complete <<<")
         else:
-            print('>>> Failed to set mode to AUV, quit <<<')
+            print(">>> Failed to set mode to AUV, quit <<<")
 
     finally:
         if set_target_mode is not None:
@@ -171,5 +182,5 @@ def main():
     rclpy.shutdown()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

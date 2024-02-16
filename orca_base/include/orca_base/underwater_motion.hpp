@@ -45,7 +45,8 @@ class UnderwaterMotion
   const BaseContext& cxt_;
   orca_msgs::msg::Motion motion_;
 
-  double report_and_clamp(const std::string& func, const std::string& name, double v, double minmax) const;
+  double report_and_clamp(const std::string& func, const std::string& name, double v,
+                          double minmax) const;
 
   [[nodiscard]] geometry_msgs::msg::Accel calc_accel(const geometry_msgs::msg::Twist& v0,
                                                      const geometry_msgs::msg::Twist& v1) const;
