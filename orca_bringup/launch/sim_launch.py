@@ -35,8 +35,13 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
+from launch.substitutions import (
+    Command,
+    FindExecutable
+)
 
 
 def generate_launch_description():
@@ -48,10 +53,26 @@ def generate_launch_description():
     orca_params_file = os.path.join(orca_bringup_dir, 'params', 'sim_orca_params.yaml')
     rosbag2_record_qos_file = os.path.join(orca_bringup_dir, 'params', 'rosbag2_record_qos.yaml')
     rviz_file = os.path.join(orca_bringup_dir, 'cfg', 'sim_launch.rviz')
-    world_file = os.path.join(orca_description_dir, 'worlds', 'sand.world')
+    world_file = os.path.join(orca_description_dir, 'gazebo', 'worlds', 'sand.world')
 
     sim_left_ini = os.path.join(orca_bringup_dir, 'cfg', 'sim_left.ini')
     sim_right_ini = os.path.join(orca_bringup_dir, 'cfg', 'sim_right.ini')
+
+    robot_description = Command(
+        [
+            PathJoinSubstitution([FindExecutable(name="xacro")]),
+            " ",
+            PathJoinSubstitution(
+                [
+                    FindPackageShare("orca_description"),
+                    "xacro",
+                    "bluerov2_heavy",
+                    "config.xacro",
+                ]
+            )
+        ]
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument(
             'ardusub',
@@ -90,7 +111,7 @@ def generate_launch_description():
         ),
 
         DeclareLaunchArgument(
-            'rviz',
+            'use_rviz',
             default_value='True',
             description='Launch rviz?',
         ),
@@ -127,13 +148,6 @@ def generate_launch_description():
             condition=IfCondition(LaunchConfiguration('bag')),
         ),
 
-        # Launch rviz
-        ExecuteProcess(
-            cmd=['rviz2', '-d', rviz_file],
-            output='screen',
-            condition=IfCondition(LaunchConfiguration('rviz')),
-        ),
-
         # Launch ArduSub w/ SIM_JSON (wipe eeprom w/ -w)
         # ardusub must be on the $PATH, see src/orca4/setup.bash
         ExecuteProcess(
@@ -157,6 +171,30 @@ def generate_launch_description():
             cmd=['gz', 'sim', '-v', '3', '-r', '-s', world_file],
             output='screen',
             condition=UnlessCondition(LaunchConfiguration('gzclient')),
+        ),
+
+        Node(
+            package="robot_state_publisher",
+            executable="robot_state_publisher",
+            output="both",
+            parameters=[
+                {"use_sim_time": False, "robot_description": robot_description}
+            ],
+        ),
+
+        Node(
+            package="rviz2",
+            executable="rviz2",
+            name="rviz2",
+            output="both",
+            arguments=[
+                "-d",
+                rviz_file,
+            ],
+            parameters=[
+                {"use_sim_time": False, "robot_description": robot_description}
+            ],
+            condition=IfCondition(LaunchConfiguration('use_rviz')),
         ),
 
         # Get images from Gazebo Sim to ROS
@@ -221,5 +259,22 @@ def generate_launch_description():
                 'orca_params_file': orca_params_file,
                 'slam': LaunchConfiguration('slam'),
             }.items(),
+        ),
+
+        # TODO: Add ability for launching multiple different configurations (bluerov2,
+        #  bluerov2_heavy, bluerov2_heavy_reach).
+        #  We currently support only bluerov2_heavy
+        # Launch TF transforms for bluerov2_heavy
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                PathJoinSubstitution(
+                    [
+                        FindPackageShare("orca_bringup"),
+                        "launch",
+                        "bluerov2_heavy",
+                        "tf.launch.py",
+                    ]
+                )
+            ),
         ),
     ])

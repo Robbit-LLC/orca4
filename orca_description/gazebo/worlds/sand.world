@@ -47,9 +47,6 @@
     <plugin
       filename="VacuumGripperPlugin"
       name="VacuumGripperPlugin">
-      <robotNamespace>/robot/left_vacuum_gripper</robotNamespace>
-      <bodyName>left_end_effector</bodyName>
-      <topicName>grasping</topicName>
     </plugin>
 
     <include>

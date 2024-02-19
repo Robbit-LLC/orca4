@@ -10,6 +10,4 @@ if (BUILD_TESTING)
     ament_lint_auto_find_test_dependencies()
 endif ()
 
-ament_auto_package(INSTALL_TO_SHARE models scripts worlds gazebo_plugins)
-
-add_subdirectory(gazebo_plugins)
+ament_auto_package(INSTALL_TO_SHARE gazebo rviz scripts xacro)
