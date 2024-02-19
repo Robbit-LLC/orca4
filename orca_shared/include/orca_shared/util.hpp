@@ -20,8 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ORCA_SHARED__UTIL_HPP_
-#define ORCA_SHARED__UTIL_HPP_
+#pragma once
 
 #include <cmath>
 #include <memory>
@@ -194,5 +193,3 @@ geometry_msgs::msg::Accel operator-(const geometry_msgs::msg::Accel& a);
 geometry_msgs::msg::Twist operator-(const geometry_msgs::msg::Twist& v);
 
 }  // namespace geometry_msgs::msg
-
-#endif  // ORCA_SHARED__UTIL_HPP_

@@ -20,8 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ORCA_SHARED__MODEL_HPP_
-#define ORCA_SHARED__MODEL_HPP_
+#pragma once
 
 #include <cmath>
 
@@ -59,9 +58,12 @@ namespace orca
   /* Yaw drag, wild guess  */                                                                                          \
   CXT_MACRO_MEMBER(mdl_thrust_dz_pwm, uint16_t, 35)                                                                    \
   /* Thruster deadzone  */                                                                                             \
-  /* End of list */
+  /* End of a list */
 
+
+#ifdef CXT_MACRO_MEMBER
 #undef CXT_MACRO_MEMBER
+#endif
 #define CXT_MACRO_MEMBER(n, t, d) CXT_MACRO_DEFINE_MEMBER(n, t, d)
 
 struct Model
@@ -387,5 +389,3 @@ struct Model
 };
 
 }  // namespace orca
-
-#endif  // ORCA_SHARED__MODEL_HPP_

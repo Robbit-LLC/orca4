@@ -20,8 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ORCA_SHARED__PWM_HPP_
-#define ORCA_SHARED__PWM_HPP_
+#pragma once
 
 #include <cstdint>
 
@@ -73,5 +72,3 @@ uint16_t effort_to_pwm(uint16_t thrust_dz_pwm, double effort);
 double pwm_to_effort(uint16_t thrust_dz_pwm, uint16_t pwm);
 
 }  // namespace orca
-
-#endif  // ORCA_SHARED__PWM_HPP_

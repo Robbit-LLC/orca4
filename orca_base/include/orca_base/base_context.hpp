@@ -20,8 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ORCA_BASE__BASE_CONTEXT_HPP_
-#define ORCA_BASE__BASE_CONTEXT_HPP_
+#pragma once
 
 #include <string>
 
@@ -55,9 +54,11 @@ namespace orca_base
                                                                                                                        \
   CXT_MACRO_MEMBER(coast, bool, false)                                                                                 \
   /* Coast to decelerate (vs powered decel), useful for ROV ops */                                                     \
-  /* End of list */
+  /* End of a list */
 
+#ifdef CXT_MACRO_MEMBER
 #undef CXT_MACRO_MEMBER
+#endif
 #define CXT_MACRO_MEMBER(n, t, d) CXT_MACRO_DEFINE_MEMBER(n, t, d)
 
 struct BaseContext : orca::Model
@@ -68,8 +69,6 @@ struct BaseContext : orca::Model
 #define BASE_ALL_PARAMS                                                                                                \
   MODEL_PARAMS                                                                                                         \
   BASE_PARAMS                                                                                                          \
-  /* End of list */
+  /* End of a list */
 
 }  // namespace orca_base
-
-#endif  // ORCA_BASE__BASE_CONTEXT_HPP_

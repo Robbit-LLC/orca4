@@ -20,8 +20,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef ORCA_BASE__UNDERWATER_MOTION_HPP_
-#define ORCA_BASE__UNDERWATER_MOTION_HPP_
+#pragma once
 
 #include <string>
 
@@ -45,7 +44,7 @@ class UnderwaterMotion
   const BaseContext& cxt_;
   orca_msgs::msg::Motion motion_;
 
-  double report_and_clamp(const std::string& func, const std::string& name, double v,
+  [[nodiscard]] double report_and_clamp(const std::string& func, const std::string& name, double v,
                           double minmax) const;
 
   [[nodiscard]] geometry_msgs::msg::Accel calc_accel(const geometry_msgs::msg::Twist& v0,
@@ -83,5 +82,3 @@ public:
 };
 
 }  // namespace orca_base
-
-#endif  // ORCA_BASE__UNDERWATER_MOTION_HPP_
