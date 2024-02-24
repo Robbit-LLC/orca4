@@ -14,7 +14,7 @@
 
         <algorithm>sinusoid</algorithm>
         <amplitude>2.0</amplitude>
-        <period>6.0</period>
+        <period>1.0</period>
         <direction>1 0</direction>
       </wave>
     </plugin>
@@ -54,7 +54,7 @@
 
             <algorithm>sinusoid</algorithm>
             <amplitude>2.0</amplitude>
-            <period>6.0</period>
+            <period>1.0</period>
             <direction>1 0</direction>
           </wave>
 

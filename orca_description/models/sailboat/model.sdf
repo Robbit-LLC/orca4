@@ -1,11 +1,15 @@
 <?xml version="1.0"?>
 <sdf version="1.6">
     <model name="sailboat">
-        <static>true</static>
+        <static>false</static>
+        <plugin
+            filename="gz-waves1-hydrodynamics-system"
+            name="gz::sim::systems::Hydrodynamics">
+        </plugin>
         <!-- There was a problem with .dae model usage for collision.
              Stl model is better suited for collision https://answers.gazebosim.org//question/8830/collision-and-collada-meshes/ -->
         <link name="sailboat_link">
-            <collision name="sailboat_collision">
+            <!-- <collision name="sailboat_collision">
                 <geometry>
                     <mesh>
                         <uri>model://sailboat/meshes/sail.stl</uri>
@@ -21,7 +25,37 @@
                         <scale>0.15 0.15 0.15</scale>
                     </mesh>
                 </geometry>
+            </visual> -->
+
+            <visual name="sailboat_visual">
+                <pose>0 0 0 0 0 0</pose>
+                <geometry>
+                <mesh>
+                    <uri>model://sailboat/meshes/sail.dae</uri>
+                    <scale>0.15 0.15 0.15</scale>
+                </mesh>
+                </geometry>
             </visual>
+            <collision name="collision">
+                <pose>0 0 0 0 0 0</pose>
+                <geometry>
+                <mesh>
+                    <uri>model://sailboat/meshes/sail.stl</uri>
+                    <scale>0.15 0.15 0.15</scale>
+                </mesh>
+                </geometry>
+            </collision>
+            <inertial>
+                <pose>0 0 0 0 0 0</pose>
+                <mass>400</mass>
+                <inertia>
+                <ixx>266</ixx>
+                <ixy>0</ixy>
+                <iyy>266</iyy>
+                <iyz>0</iyz>
+                <izz>266</izz>
+                </inertia>
+            </inertial>
         </link>
     </model>
 </sdf>

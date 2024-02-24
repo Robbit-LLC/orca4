@@ -27,7 +27,7 @@
         name="gz::sim::systems::Imu">
     </plugin>
 
-    <!-- Buoyancy plugin manages buoyancy for all models -->
+        <!-- Buoyancy plugin manages buoyancy for all models -->
     <plugin
         filename="gz-sim-buoyancy-system"
         name="gz::sim::systems::Buoyancy">
@@ -44,9 +44,10 @@
       <enable>sailboat</enable>
     </plugin>
 
-    <include>
+
+    <!-- <include>
       <uri>https://fuel.gazebosim.org/1.0/OpenRobotics/models/Sun</uri>
-    </include>
+    </include> -->
 
     <include>
       <pose>0 0 0 0 0 0</pose>
@@ -54,29 +55,35 @@
     </include>
 
     <include>
+      <pose>0 0 0 0 0 0</pose>
+      <uri>model://duck</uri>
+    </include>
+
+  <!-- Most likely not necessary since we have waves -->
+    <!-- <include>
       <uri>model://sea_surface</uri>
       <pose>0 7 0 0 0 0</pose>
-    </include>
+    </include> -->
 
-    <include>
+    <!-- <include>
      <uri>model://sand_heightmap</uri>
      <pose>0 7 -10 0 0 0</pose>
-    </include>
+    </include> -->
 
-    <include>
+    <!-- <include>
       <uri>model://orca4</uri>
       <pose>0 0 -0.2 0 0 0</pose>
-    </include>
+    </include> -->
 
     <include>
       <uri>model://sailboat</uri>
-      <pose>2 0 -1.15 0 0 0</pose>
+      <pose>0 0 0 0 0 0</pose>
     </include>
 
-    <include>
+    <!-- <include>
      <uri>model://axes</uri>
      <pose>0 0 0.2 0 0 0</pose>
-    </include>
+    </include> -->
 
   </world>
 </sdf>
